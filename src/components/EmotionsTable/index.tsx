@@ -42,8 +42,8 @@ export const EmotionsTable: React.FC<{ expressionsData: any[] }> = ({ expression
     }));
 
     return (
-        <div className="mt-8 mb-4">
-            <h2 className="text-xl font-bold mb-4 text-center">Статистика эмоций</h2>
+        <div className="mb-auto">
+            <h2 className="text-xl font-bold mb-2 text-center">Статистика эмоций</h2>
             <div className='overflow-x-scroll'>
                 <table className="min-w-full bg-white">
                     <thead>

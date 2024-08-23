@@ -1,7 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Bar} from 'react-chartjs-2';
 import {BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip,} from 'chart.js';
 import {Emotion} from "../../constants";
+import FullscreenModal from "../Modal";
+import FullscreenIcon from "../../icons/FullscreenIcon.tsx";
 
 ChartJS.register(
     CategoryScale,
@@ -13,6 +15,9 @@ ChartJS.register(
 );
 
 export const EmotionsBarChart: React.FC<{ expressionsData: any[] }> = ({ expressionsData }) => {
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const toggleModal = () => setIsModalVisible(!isModalVisible);
+
     const emotionTotals = {
         angry: 0,
         disgusted: 0,
@@ -115,5 +120,15 @@ export const EmotionsBarChart: React.FC<{ expressionsData: any[] }> = ({ express
         },
     };
 
-    return <Bar data={data} options={options} />;
+    return <section className='w-full h-fit relative'>
+        <button className='p-4 absolute -top-4 left-0 cursor-pointer' onClick={toggleModal}>
+            <FullscreenIcon className='h-6 w-6 '/>
+        </button>
+
+        <Bar data={data} options={options} />
+
+        <FullscreenModal visible={isModalVisible} onClose={toggleModal}>
+            <Bar data={data} options={options} />
+        </FullscreenModal>
+    </section>;
 };

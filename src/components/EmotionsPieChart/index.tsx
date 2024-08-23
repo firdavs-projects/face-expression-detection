@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Pie } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -9,6 +9,8 @@ import {
     TooltipItem,
 } from 'chart.js';
 import {Emotion} from "../../constants";
+import FullscreenIcon from "../../icons/FullscreenIcon.tsx";
+import FullscreenModal from "../Modal";
 
 ChartJS.register(
     ArcElement,
@@ -17,6 +19,9 @@ ChartJS.register(
 );
 
 export const EmotionsPieChart: React.FC<{ expressionsData: any[] }> = ({ expressionsData }) => {
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const toggleModal = () => setIsModalVisible(!isModalVisible);
+
     const emotionTotals = {
         angry: 0,
         disgusted: 0,
@@ -78,7 +83,7 @@ export const EmotionsPieChart: React.FC<{ expressionsData: any[] }> = ({ express
         responsive: true,
         plugins: {
             legend: {
-                position: 'top',
+                position: 'left',
             },
             title: {
                 display: true,
@@ -95,8 +100,15 @@ export const EmotionsPieChart: React.FC<{ expressionsData: any[] }> = ({ express
     };
 
     return (
-        <section className='max-w-[800px] max-h-[1000px] mx-auto mt-4'>
-            <Pie data={data} options={options} />
+        <section className='max-h-[350px] w-full relative'>
+            <button className='p-4 absolute -top-4 left-0 cursor-pointer' onClick={toggleModal}>
+                <FullscreenIcon className='h-6 w-6'/>
+            </button>
+            <Pie data={data} options={options}  />
+
+            <FullscreenModal visible={isModalVisible} onClose={toggleModal}>
+                <Pie data={data} options={options}  />
+            </FullscreenModal>
         </section>
     );
 };

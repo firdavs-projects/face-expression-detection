@@ -4,11 +4,12 @@ import { EmotionsTable } from "../EmotionsTable";
 import { EmotionsBarChart } from "../EmotionsBarChart";
 import { EmotionsPieChart } from "../EmotionsPieChart";
 import {EmotionsChart} from "../EmotionsChart";
+import {Emotion} from "../../constants";
 
 const FaceExpressionDetection: React.FC = () => {
     const [videoFile, setVideoFile] = useState<File | null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
-    const canvasRef = useRef<HTMLCanvasElement | null>(null); // Canvas ref can be null
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [expressionsData, setExpressionsData] = useState<any[]>([]);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [isModelsLoaded, setIsModelsLoaded] = useState(false);
@@ -78,9 +79,29 @@ const FaceExpressionDetection: React.FC = () => {
                         const ctx = canvas.getContext('2d');
                         if (ctx) {
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
                             faceapi.draw.drawDetections(canvas, detections);
-                            faceapi.draw.drawFaceExpressions(canvas, detections);
                             faceapi.draw.drawFaceLandmarks(canvas, detectionsWithLandmarks);
+                            // faceapi.draw.drawFaceExpressions(canvas, detections);
+
+                            detections.forEach(detection => {
+                                const { detection: faceDetection, expressions } = detection;
+                                const { box } = faceDetection;
+
+                                const emotion = Object.keys(expressions).reduce((maxEmotion, currentEmotion) => {
+                                    return expressions[currentEmotion as keyof typeof expressions] > expressions[maxEmotion as keyof typeof expressions]
+                                        ? currentEmotion
+                                        : maxEmotion;
+                                }, 'neutral');
+
+                                const translation = Emotion[emotion as keyof typeof Emotion] || emotion;
+
+                                ctx.font = '42px Arial';
+                                ctx.fillStyle = 'blue';
+                                ctx.textAlign = 'left';
+
+                                ctx.fillText(translation, box.left, box.bottom + 50);
+                            });
                         }
                     }
                 } catch (error) {
@@ -101,10 +122,10 @@ const FaceExpressionDetection: React.FC = () => {
     };
 
     return (
-        <div className="p-4 container mx-auto mb-8">
-            <header className="mb-8 text-center">
-                <h1 className="text-2xl font-bold mb-4">Анализ эмоций</h1>
-                <p className="text-gray-600">Загрузите видео для анализа эмоций</p>
+        <div className="p-2 container-xl mx-auto">
+            <header className="text-center">
+                <h1 className="text-2xl font-bold mb-2">Анализ эмоций</h1>
+                {/*<p className="text-gray-600">Загрузите видео для анализа эмоций</p>*/}
             </header>
 
             <input
@@ -112,33 +133,37 @@ const FaceExpressionDetection: React.FC = () => {
                 accept="video/*"
                 disabled={isAnalyzing || !isModelsLoaded}
                 onChange={handleVideoUpload}
-                className="mb-4 mr-2"
+                className="mb-2 mr-2"
             />
             {videoFile && (
                 <>
                     <button
                         onClick={handleAnalyze}
                         disabled={isAnalyzing || !isModelsLoaded}
-                        className="mb-4 bg-blue-500 text-white p-2"
+                        className="mb-2 bg-blue-500 text-white p-2"
                     >
                         {isAnalyzing ? "Идет анализ..." : "Анализ эмоций"}
                     </button>
-                    <div style={{ position: 'relative' }}>
-                        <video ref={videoRef} controls className="w-full max-w-fit min-w-full">
-                            <source src={URL.createObjectURL(videoFile)} />
-                        </video>
-                        <canvas ref={canvasRef} className="w-full max-w-fit" style={{ position: 'absolute', top: 0, left: 0 }} />
-                    </div>
+                    <section className='grid grid-cols-12 gap-6'>
+                        <div className='col-span-8 grid gap-3' style={{ position: 'relative' }}>
+                            <video ref={videoRef} controls className="w-full max-w-fit min-w-full">
+                                <source src={URL.createObjectURL(videoFile)} />
+                            </video>
+                            <canvas ref={canvasRef} className="w-full max-w-fit absolute top-0 left-0" />
 
+                            {expressionsData.length > 0 && (
+                                <EmotionsTable expressionsData={expressionsData} />
+                            )}
+                        </div>
+                        {expressionsData.length > 0 && (
+                            <div className='col-span-4 grid gap-3'>
+                                <EmotionsBarChart expressionsData={expressionsData}/>
+                                <EmotionsChart expressionsData={expressionsData}/>
+                                <EmotionsPieChart expressionsData={expressionsData} />
+                            </div>
+                        )}
+                    </section>
                 </>
-            )}
-            {expressionsData.length > 0 && (
-                <div className="mt-8">
-                    <EmotionsTable expressionsData={expressionsData} />
-                    <EmotionsChart expressionsData={expressionsData} />
-                    <EmotionsBarChart expressionsData={expressionsData} />
-                    <EmotionsPieChart expressionsData={expressionsData} />
-                </div>
             )}
         </div>
     );

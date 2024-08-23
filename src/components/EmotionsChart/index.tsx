@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -11,6 +11,8 @@ import {
     Legend,
 } from 'chart.js';
 import {Emotion} from "../../constants";
+import FullscreenIcon from "../../icons/FullscreenIcon.tsx";
+import FullscreenModal from "../Modal";
 
 // Регистрируем необходимые компоненты Chart.js
 ChartJS.register(
@@ -24,6 +26,9 @@ ChartJS.register(
 );
 
 export const EmotionsChart: React.FC<{ expressionsData: any[] }> = ({ expressionsData }) => {
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const toggleModal = () => setIsModalVisible(!isModalVisible);
+
     const data = {
         labels: expressionsData.map((_, index) => `Кадр ${index + 1}`),
         datasets: [
@@ -107,5 +112,16 @@ export const EmotionsChart: React.FC<{ expressionsData: any[] }> = ({ expression
         },
     };
 
-    return <Line data={data} options={options} />;
+    return (
+        <section className='w-full h-fit relative'>
+            <button className='p-4 absolute -top-4 left-0 cursor-pointer' onClick={toggleModal}>
+                <FullscreenIcon className='h-6 w-6'/>
+            </button>
+            <Line data={data} options={options} />
+
+            <FullscreenModal visible={isModalVisible} onClose={toggleModal}>
+                <Line data={data} options={options} />
+            </FullscreenModal>
+        </section>
+    );
 };
