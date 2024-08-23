@@ -71,8 +71,7 @@ const FaceExpressionDetection: React.FC = () => {
                             .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
                             .withFaceExpressions();
                         const detectionsWithLandmarks = await faceapi
-                            .detectAllFaces(video, new faceapi.SsdMobilenetv1Options())
-                            .withFaceLandmarks()
+                            .detectAllFaces(video).withFaceLandmarks()
 
                         setExpressionsData(prevData => [...prevData, detections]);
 
@@ -80,8 +79,8 @@ const FaceExpressionDetection: React.FC = () => {
                         if (ctx) {
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                            faceapi.draw.drawDetections(canvas, detections);
                             faceapi.draw.drawFaceLandmarks(canvas, detectionsWithLandmarks);
+                            // faceapi.draw.drawDetections(canvas, detections);
                             // faceapi.draw.drawFaceExpressions(canvas, detections);
 
                             detections.forEach(detection => {
@@ -97,10 +96,20 @@ const FaceExpressionDetection: React.FC = () => {
                                 const translation = Emotion[emotion as keyof typeof Emotion] || emotion;
 
                                 ctx.font = '42px Arial';
-                                ctx.fillStyle = 'blue';
+                                ctx.fillStyle = 'lightgreen';
                                 ctx.textAlign = 'left';
+                                ctx.strokeStyle = 'lightgreen';
+                                ctx.lineWidth = 6;
 
                                 ctx.fillText(translation, box.left, box.bottom + 50);
+                                ctx.beginPath();
+                                ctx.rect(box.left, box.top, box.width, box.height);
+                                ctx.stroke();
+                            });
+
+                            detectionsWithLandmarks.forEach(detection => {
+                                // const { landmarks } = detection;
+                                console.log(detection)
                             });
                         }
                     }
@@ -145,7 +154,7 @@ const FaceExpressionDetection: React.FC = () => {
                         {isAnalyzing ? "Идет анализ..." : "Анализ эмоций"}
                     </button>
                     <section className='grid grid-cols-12 gap-6'>
-                        <div className='col-span-8 grid gap-3' style={{ position: 'relative' }}>
+                        <div className='col-span-7 grid gap-3' style={{ position: 'relative' }}>
                             <video ref={videoRef} controls className="w-full max-w-fit min-w-full">
                                 <source src={URL.createObjectURL(videoFile)} />
                             </video>
@@ -156,7 +165,7 @@ const FaceExpressionDetection: React.FC = () => {
                             )}
                         </div>
                         {expressionsData.length > 0 && (
-                            <div className='col-span-4 grid gap-3'>
+                            <div className='col-span-5 grid gap-3'>
                                 <EmotionsBarChart expressionsData={expressionsData}/>
                                 <EmotionsChart expressionsData={expressionsData}/>
                                 <EmotionsPieChart expressionsData={expressionsData} />

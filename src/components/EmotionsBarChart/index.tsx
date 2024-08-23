@@ -1,18 +1,9 @@
-import React, {useState} from 'react';
-import {Bar} from 'react-chartjs-2';
-import {BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip,} from 'chart.js';
-import {Emotion} from "../../constants";
-import FullscreenModal from "../Modal";
-import FullscreenIcon from "../../icons/FullscreenIcon.tsx";
-
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-);
+import React, { useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
+import FullscreenModal from '../Modal';
+import FullscreenIcon from '../../icons/FullscreenIcon.tsx';
+import { iconEmoji } from '../../icons/icons.tsx';
+import {Emotion, emotionColors} from '../../constants';
 
 export const EmotionsBarChart: React.FC<{ expressionsData: any[] }> = ({ expressionsData }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -37,98 +28,61 @@ export const EmotionsBarChart: React.FC<{ expressionsData: any[] }> = ({ express
         }
     });
 
-    const data = {
-        labels: ['Эмоции'],
-        datasets: [
-            {
-                label: Emotion.angry,
-                data: [emotionTotals.angry],
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1,
-            },
-            {
-                label: Emotion.disgusted,
-                data: [emotionTotals.disgusted],
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
-            },
-            {
-                label: Emotion.fearful,
-                data: [emotionTotals.fearful],
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1,
-            },
-            {
-                label: Emotion.happy,
-                data: [emotionTotals.happy],
-                backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                borderColor: 'rgba(255, 206, 86, 1)',
-                borderWidth: 1,
-            },
-            {
-                label: Emotion.neutral,
-                data: [emotionTotals.neutral],
-                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                borderColor: 'rgba(153, 102, 255, 1)',
-                borderWidth: 1,
-            },
-            {
-                label: Emotion.sad,
-                data: [emotionTotals.sad],
-                backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                borderColor: 'rgba(255, 159, 64, 1)',
-                borderWidth: 1,
-            },
-            {
-                label: Emotion.surprised,
-                data: [emotionTotals.surprised],
-                backgroundColor: 'rgba(201, 203, 207, 0.2)',
-                borderColor: 'rgba(201, 203, 207, 1)',
-                borderWidth: 1,
-            },
-        ],
+    const chartData = [
+        {key: 'angry', name: Emotion.angry, 'Интенсивность': emotionTotals.angry, emoji: iconEmoji['angry'] },
+        {key: 'disgusted', name: Emotion.disgusted, 'Интенсивность': emotionTotals.disgusted, emoji: iconEmoji['disgusted'] },
+        {key: 'fearful', name: Emotion.fearful, 'Интенсивность': emotionTotals.fearful, emoji: iconEmoji['fearful'] },
+        {key: 'happy', name: Emotion.happy, 'Интенсивность': emotionTotals.happy, emoji: iconEmoji['happy'] },
+        {key: 'neutral', name: Emotion.neutral, 'Интенсивность': emotionTotals.neutral, emoji: iconEmoji['neutral'] },
+        {key: 'sad', name: Emotion.sad, 'Интенсивность': emotionTotals.sad, emoji: iconEmoji['sad'] },
+        {key: 'surprised', name: Emotion.surprised, 'Интенсивность': emotionTotals.surprised, emoji: iconEmoji['surprised'] }
+    ];
+
+    const renderCustomYAxisTick = ({ x, y, payload }: any) => {
+        const data = chartData[payload.index];
+        return (
+            <g transform={`translate(${x},${y})`}>
+                <foreignObject x="-23" y="-15" width="24" height="24">
+                    {data.emoji}
+                </foreignObject>
+                <text x="0" y="2" dy={15} fontSize={12} textAnchor="end" fill={emotionColors[data.key]}>
+                    {data.name}
+                </text>
+            </g>
+        );
     };
 
-    const options = {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'top' as const,
-            },
-            title: {
-                display: true,
-                text: 'График общей интенсивности эмоций',
-            },
-        },
-        scales: {
-            x: {
-                title: {
-                    display: false,
-                    text: 'Эмоции',
-                },
-            },
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Общая интенсивность эмоций',
-                },
-            },
-        },
-    };
+    const Chart = ({height = 300}: {height?: number}) => (
+        <ResponsiveContainer width="100%" height={height}>
+            <BarChart
+                data={chartData} layout="vertical"
+                title="График распределения эмоции"
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            >
+                <XAxis type="number" fontSize={14}/>
+                <YAxis type="category" dataKey="name" tick={renderCustomYAxisTick} width={80} />
+                <Tooltip />
+                <Legend />
+                <Bar isAnimationActive={false} dataKey='Интенсивность' fill='gray'>
+                    {chartData.map((data, index) => (
+                        <Cell key={`cell-${index}`} fill={emotionColors[data.key]}/>
+                    ))}
+                </Bar>
+            </BarChart>
+        </ResponsiveContainer>
+    )
 
-    return <section className='w-full h-fit relative'>
-        <button className='p-4 absolute -top-4 left-0 cursor-pointer' onClick={toggleModal}>
-            <FullscreenIcon className='h-6 w-6 '/>
-        </button>
+    return (
+        <section className='w-full h-fit relative flex items-center'>
+            <button className='p-4 absolute -top-4 left-0 cursor-pointer z-10' onClick={toggleModal}>
+                <FullscreenIcon className='h-6 w-6' />
+            </button>
 
-        <Bar data={data} options={options} />
+            <Chart />
 
-        <FullscreenModal visible={isModalVisible} onClose={toggleModal}>
-            <Bar data={data} options={options} />
-        </FullscreenModal>
-    </section>;
+            <FullscreenModal visible={isModalVisible} onClose={toggleModal}>
+                <Chart height={700}/>
+            </FullscreenModal>
+        </section>
+    );
 };

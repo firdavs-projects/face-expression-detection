@@ -1,21 +1,21 @@
-import React, {useState} from 'react';
-import { Pie } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    ArcElement,
-    Tooltip,
-    Legend,
-    ChartOptions,
-    TooltipItem,
-} from 'chart.js';
-import {Emotion} from "../../constants";
-import FullscreenIcon from "../../icons/FullscreenIcon.tsx";
-import FullscreenModal from "../Modal";
+import React, { useState } from 'react';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import FullscreenIcon from '../../icons/FullscreenIcon.tsx';
+import FullscreenModal from '../Modal';
+import { iconEmoji } from '../../icons/icons.tsx';
+import {Emotion, emotionColors} from '../../constants';
 
-ChartJS.register(
-    ArcElement,
-    Tooltip,
-    Legend
+const CustomLegend: React.FC<{ payload?: any[] }> = ({ payload }) => (
+    <div className="flex flex-wrap gap-1 text-sm justify-center">
+        {payload?.map((entry, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center', margin: '0 4px', color: emotionColors[entry.value] }}>
+                <span style={{ marginRight: 4 }}>
+                    {iconEmoji[entry.value] || entry.value}
+                </span>
+                <span>{Emotion[entry.value as keyof typeof Emotion] || entry.value}</span>
+            </div>
+        ))}
+    </div>
 );
 
 export const EmotionsPieChart: React.FC<{ expressionsData: any[] }> = ({ expressionsData }) => {
@@ -41,73 +41,53 @@ export const EmotionsPieChart: React.FC<{ expressionsData: any[] }> = ({ express
         }
     });
 
+    const chartData = [
+        { name: 'angry', value: emotionTotals.angry },
+        { name: 'disgusted', value: emotionTotals.disgusted },
+        { name: 'fearful', value: emotionTotals.fearful },
+        { name: 'happy', value: emotionTotals.happy },
+        { name: 'neutral', value: emotionTotals.neutral },
+        { name: 'sad', value: emotionTotals.sad },
+        { name: 'surprised', value: emotionTotals.surprised }
+    ];
 
+    const Chart = ({height=250, radius=100}: {height?: number; radius?: number}) => (
+        <>
+            <h2 className='text-center'>
+                Круговая диаграмма эмоций
+            </h2>
+        <ResponsiveContainer width="100%" height={height}>
 
-    const data = {
-        labels: Object.values(Emotion),
-        datasets: [
-            {
-                data: [
-                    emotionTotals.angry,
-                    emotionTotals.disgusted,
-                    emotionTotals.fearful,
-                    emotionTotals.happy,
-                    emotionTotals.neutral,
-                    emotionTotals.sad,
-                    emotionTotals.surprised
-                ],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                    'rgba(153, 102, 255, 0.6)',
-                    'rgba(255, 159, 64, 0.6)',
-                    'rgba(201, 203, 207, 0.6)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)',
-                    'rgba(201, 203, 207, 1)'
-                ],
-                borderWidth: 1,
-            },
-        ],
-    };
-
-    const options: ChartOptions<'pie'> = {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'left',
-            },
-            title: {
-                display: true,
-                text: 'Круговая диаграмма эмоций ',
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(tooltipItem: TooltipItem<'pie'>) {
-                        return `${tooltipItem.label}: ${tooltipItem.raw}`;
-                    }
-                }
-            }
-        },
-    };
+            <PieChart>
+                <Tooltip />
+                <Legend content={<CustomLegend />} />
+                <Pie
+                    data={chartData}
+                    dataKey="value"
+                    nameKey="name"
+                    outerRadius={radius}
+                    fill="#8884d8"
+                    isAnimationActive={false}
+                >
+                    {chartData.map((entry, index) => (
+                        <Cell  key={`cell-${index}`} fill={emotionColors[entry.name]} />
+                    ))}
+                </Pie>
+            </PieChart>
+        </ResponsiveContainer>
+    </>
+    )
 
     return (
         <section className='max-h-[350px] w-full relative'>
-            <button className='p-4 absolute -top-4 left-0 cursor-pointer' onClick={toggleModal}>
-                <FullscreenIcon className='h-6 w-6'/>
+            <button className='p-4 absolute -top-4 left-0 cursor-pointer z-10' onClick={toggleModal}>
+                <FullscreenIcon className='h-6 w-6' />
             </button>
-            <Pie data={data} options={options}  />
+
+            <Chart />
 
             <FullscreenModal visible={isModalVisible} onClose={toggleModal}>
-                <Pie data={data} options={options}  />
+                <Chart height={700} radius={300} />
             </FullscreenModal>
         </section>
     );

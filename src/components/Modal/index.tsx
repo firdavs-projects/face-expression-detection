@@ -14,7 +14,7 @@ const FullscreenModal: React.FC<FullscreenModalProps> = ({ visible, onClose, chi
             <div className="relative bg-white w-full h-fit max-w-full max-h-[calc(100vh-4rem)] m-4 rounded-lg overflow-hidden">
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
+                    className="absolute z-10 top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
                     <svg
                         className="w-6 h-6"
@@ -31,7 +31,7 @@ const FullscreenModal: React.FC<FullscreenModalProps> = ({ visible, onClose, chi
                         />
                     </svg>
                 </button>
-                <div className="p-4 flex justify-center items-center h-full max-h-[calc(100vh-4rem)] overflow-auto">
+                <div className="p-4 relative flex flex-col justify-center items-center h-full max-h-[calc(100vh-4rem)] overflow-auto">
                     {children}
                 </div>
             </div>

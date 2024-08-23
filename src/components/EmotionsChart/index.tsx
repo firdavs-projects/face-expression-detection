@@ -1,126 +1,75 @@
-import React, {useState} from 'react';
-import { Line } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-} from 'chart.js';
-import {Emotion} from "../../constants";
-import FullscreenIcon from "../../icons/FullscreenIcon.tsx";
-import FullscreenModal from "../Modal";
+import React, { useState } from 'react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid } from 'recharts';
+import FullscreenIcon from '../../icons/FullscreenIcon.tsx';
+import FullscreenModal from '../Modal';
+import { iconEmoji } from '../../icons/icons.tsx';
+import {Emotion, emotionColors} from '../../constants';
 
-// Регистрируем необходимые компоненты Chart.js
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
+
+const CustomLegend: React.FC<{ payload?: any[] }> = ({ payload }) => (
+    <div className="flex flex-wrap gap-1 text-sm justify-center">
+        {payload?.map((entry, index) => (
+            <div key={index} className='flex items-center'>
+                <span style={{ marginRight: 2 }}>
+                    {iconEmoji[entry.value] || entry.value}
+                </span>
+                <span style={{ color: emotionColors[entry.value] }}>
+                    {Emotion[entry.value as keyof typeof Emotion] || entry.value}
+                </span>
+            </div>
+        ))}
+    </div>
 );
 
 export const EmotionsChart: React.FC<{ expressionsData: any[] }> = ({ expressionsData }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const toggleModal = () => setIsModalVisible(!isModalVisible);
 
-    const data = {
-        labels: expressionsData.map((_, index) => `Кадр ${index + 1}`),
-        datasets: [
-            {
-                label: Emotion.angry,
-                data: expressionsData.map(data => data[0]?.expressions?.angry || 0),
-                borderColor: 'rgba(255, 99, 132, 1)',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                fill: false,
-            },
-            {
-                label: Emotion.disgusted,
-                data: expressionsData.map(data => data[0]?.expressions?.disgusted || 0),
-                borderColor: 'rgba(54, 162, 235, 1)',
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                fill: false,
-            },
-            {
-                label: Emotion.fearful,
-                data: expressionsData.map(data => data[0]?.expressions?.fearful || 0),
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: false,
-            },
-            {
-                label: Emotion.happy,
-                data: expressionsData.map(data => data[0]?.expressions?.happy || 0),
-                borderColor: 'rgba(255, 206, 86, 1)',
-                backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                fill: false,
-            },
-            {
-                label: Emotion.neutral,
-                data: expressionsData.map(data => data[0]?.expressions?.neutral || 0),
-                borderColor: 'rgba(153, 102, 255, 1)',
-                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                fill: false,
-            },
-            {
-                label: Emotion.sad,
-                data: expressionsData.map(data => data[0]?.expressions?.sad || 0),
-                borderColor: 'rgba(255, 159, 64, 1)',
-                backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                fill: false,
-            },
-            {
-                label: Emotion.surprised,
-                data: expressionsData.map(data => data[0]?.expressions?.surprised || 0),
-                borderColor: 'rgba(201, 203, 207, 1)',
-                backgroundColor: 'rgba(201, 203, 207, 0.2)',
-                fill: false,
-            },
-        ],
-    };
+    const chartData = expressionsData.map((data, index) => ({
+        frame: `Кадр ${index + 1}`,
+        angry: data[0]?.expressions?.angry || 0,
+        disgusted: data[0]?.expressions?.disgusted || 0,
+        fearful: data[0]?.expressions?.fearful || 0,
+        happy: data[0]?.expressions?.happy || 0,
+        neutral: data[0]?.expressions?.neutral || 0,
+        sad: data[0]?.expressions?.sad || 0,
+        surprised: data[0]?.expressions?.surprised || 0
+    }));
 
-    const options = {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'top' as const,
-            },
-            title: {
-                display: true,
-                text: 'График распределения эмоции',
-            },
-        },
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: 'Кадры',
-                },
-            },
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Интенсивность эмоции',
-                },
-            },
-        },
-    };
+    const Chart = ({height = 250}: {height?: number}) => (
+        <>
+            <h2 className='text-center'>
+                График распределения эмоции
+            </h2>
+            <ResponsiveContainer width="100%" height={height}>
+                <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis fontSize={14} dataKey="frame" />
+                    <YAxis fontSize={14} />
+                    <Tooltip />
+                    <Legend content={<CustomLegend />} />
+                    <Line isAnimationActive={false} type="monotone" dataKey="angry" stroke={emotionColors.angry} dot={false} />
+                    <Line isAnimationActive={false} type="monotone" dataKey="disgusted" stroke={emotionColors.disgusted} dot={false} />
+                    <Line isAnimationActive={false} type="monotone" dataKey="fearful" stroke={emotionColors.fearful} dot={false} />
+                    <Line isAnimationActive={false} type="monotone" dataKey="happy" stroke={emotionColors.happy} dot={false} />
+                    <Line isAnimationActive={false} type="monotone" dataKey="neutral" stroke={emotionColors.neutral} dot={false} />
+                    <Line isAnimationActive={false} type="monotone" dataKey="sad" stroke={emotionColors.sad} dot={false} />
+                    <Line isAnimationActive={false} type="monotone" dataKey="surprised" stroke={emotionColors.surprised} dot={false} />
+                </LineChart>
+            </ResponsiveContainer>
+        </>
+    )
 
     return (
         <section className='w-full h-fit relative'>
-            <button className='p-4 absolute -top-4 left-0 cursor-pointer' onClick={toggleModal}>
-                <FullscreenIcon className='h-6 w-6'/>
+            <button className='p-4 absolute -top-4 left-0 cursor-pointer z-10' onClick={toggleModal}>
+                <FullscreenIcon className='h-6 w-6' />
             </button>
-            <Line data={data} options={options} />
+
+            <Chart />
 
             <FullscreenModal visible={isModalVisible} onClose={toggleModal}>
-                <Line data={data} options={options} />
+                <Chart height={700} />
             </FullscreenModal>
         </section>
     );
