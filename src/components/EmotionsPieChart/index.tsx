@@ -8,6 +8,7 @@ import {
     ChartOptions,
     TooltipItem,
 } from 'chart.js';
+import {Emotion} from "../../constants";
 
 ChartJS.register(
     ArcElement,
@@ -35,8 +36,10 @@ export const EmotionsPieChart: React.FC<{ expressionsData: any[] }> = ({ express
         }
     });
 
+
+
     const data = {
-        labels: ['Angry', 'Disgusted', 'Fearful', 'Happy', 'Neutral', 'Sad', 'Surprised'],
+        labels: Object.values(Emotion),
         datasets: [
             {
                 data: [
@@ -79,7 +82,7 @@ export const EmotionsPieChart: React.FC<{ expressionsData: any[] }> = ({ express
             },
             title: {
                 display: true,
-                text: 'Emotions Pie Chart',
+                text: 'Круговая диаграмма эмоций ',
             },
             tooltip: {
                 callbacks: {

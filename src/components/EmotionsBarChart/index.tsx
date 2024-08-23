@@ -1,14 +1,7 @@
 import React from 'react';
-import { Bar } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
-} from 'chart.js';
+import {Bar} from 'react-chartjs-2';
+import {BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip,} from 'chart.js';
+import {Emotion} from "../../constants";
 
 ChartJS.register(
     CategoryScale,
@@ -40,52 +33,52 @@ export const EmotionsBarChart: React.FC<{ expressionsData: any[] }> = ({ express
     });
 
     const data = {
-        labels: ['Emotions'],
+        labels: ['Эмоции'],
         datasets: [
             {
-                label: 'Angry',
+                label: Emotion.angry,
                 data: [emotionTotals.angry],
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 borderColor: 'rgba(255, 99, 132, 1)',
                 borderWidth: 1,
             },
             {
-                label: 'Disgusted',
+                label: Emotion.disgusted,
                 data: [emotionTotals.disgusted],
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1,
             },
             {
-                label: 'Fearful',
+                label: Emotion.fearful,
                 data: [emotionTotals.fearful],
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1,
             },
             {
-                label: 'Happy',
+                label: Emotion.happy,
                 data: [emotionTotals.happy],
                 backgroundColor: 'rgba(255, 206, 86, 0.2)',
                 borderColor: 'rgba(255, 206, 86, 1)',
                 borderWidth: 1,
             },
             {
-                label: 'Neutral',
+                label: Emotion.neutral,
                 data: [emotionTotals.neutral],
                 backgroundColor: 'rgba(153, 102, 255, 0.2)',
                 borderColor: 'rgba(153, 102, 255, 1)',
                 borderWidth: 1,
             },
             {
-                label: 'Sad',
+                label: Emotion.sad,
                 data: [emotionTotals.sad],
                 backgroundColor: 'rgba(255, 159, 64, 0.2)',
                 borderColor: 'rgba(255, 159, 64, 1)',
                 borderWidth: 1,
             },
             {
-                label: 'Surprised',
+                label: Emotion.surprised,
                 data: [emotionTotals.surprised],
                 backgroundColor: 'rgba(201, 203, 207, 0.2)',
                 borderColor: 'rgba(201, 203, 207, 1)',
@@ -102,21 +95,21 @@ export const EmotionsBarChart: React.FC<{ expressionsData: any[] }> = ({ express
             },
             title: {
                 display: true,
-                text: 'Overall Emotions for the Video',
+                text: 'График общей интенсивности эмоций',
             },
         },
         scales: {
             x: {
                 title: {
                     display: false,
-                    text: 'Emotions',
+                    text: 'Эмоции',
                 },
             },
             y: {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text: 'Total Expression Intensity',
+                    text: 'Общая интенсивность эмоций',
                 },
             },
         },

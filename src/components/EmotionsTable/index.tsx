@@ -1,4 +1,5 @@
 import React from 'react';
+import {Emotion} from "../../constants";
 
 interface EmotionCounts {
     angry: number;
@@ -42,20 +43,20 @@ export const EmotionsTable: React.FC<{ expressionsData: any[] }> = ({ expression
 
     return (
         <div className="mt-8 mb-4">
-            <h2 className="text-xl font-bold mb-4 text-center">Emotions Statistics</h2>
+            <h2 className="text-xl font-bold mb-4 text-center">Статистика эмоций</h2>
             <div className='overflow-x-scroll'>
                 <table className="min-w-full bg-white">
                     <thead>
                     <tr>
-                        <th className="py-2 px-4 border">Emotion</th>
-                        <th className="py-2 px-4 border">Count</th>
-                        <th className="py-2 px-4 border">Percentage (%)</th>
+                        <th className="py-2 px-4 border">Эмоция</th>
+                        <th className="py-2 px-4 border">Количество</th>
+                        <th className="py-2 px-4 border">Процент (%)</th>
                     </tr>
                     </thead>
                     <tbody>
                     {percentageData.map((data) => (
                         <tr key={data.emotion}>
-                            <td className="py-2 px-4 border">{data.emotion.toUpperCase()}</td>
+                            <td className="py-2 px-4 border">{Emotion[data.emotion as keyof typeof Emotion]}</td>
                             <td className="py-2 px-4 border">{data.count}</td>
                             <td className="py-2 px-4 border">{data.percentage}</td>
                         </tr>

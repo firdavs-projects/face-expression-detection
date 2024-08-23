@@ -3,6 +3,7 @@ import * as faceapi from 'face-api.js';
 import { EmotionsTable } from "../EmotionsTable";
 import { EmotionsBarChart } from "../EmotionsBarChart";
 import { EmotionsPieChart } from "../EmotionsPieChart";
+import {EmotionsChart} from "../EmotionsChart";
 
 const FaceExpressionDetection: React.FC = () => {
     const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -16,7 +17,9 @@ const FaceExpressionDetection: React.FC = () => {
         const loadModels = async () => {
             Promise.all([
                 faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-                faceapi.nets.faceExpressionNet.loadFromUri('/models')
+                faceapi.nets.faceExpressionNet.loadFromUri('/models'),
+                faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
+                faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
             ]).then(() => setIsModelsLoaded(true));
         }
         loadModels();
@@ -66,6 +69,9 @@ const FaceExpressionDetection: React.FC = () => {
                         const detections = await faceapi
                             .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
                             .withFaceExpressions();
+                        const detectionsWithLandmarks = await faceapi
+                            .detectAllFaces(video, new faceapi.SsdMobilenetv1Options())
+                            .withFaceLandmarks()
 
                         setExpressionsData(prevData => [...prevData, detections]);
 
@@ -74,6 +80,7 @@ const FaceExpressionDetection: React.FC = () => {
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                             faceapi.draw.drawDetections(canvas, detections);
                             faceapi.draw.drawFaceExpressions(canvas, detections);
+                            faceapi.draw.drawFaceLandmarks(canvas, detectionsWithLandmarks);
                         }
                     }
                 } catch (error) {
@@ -96,8 +103,8 @@ const FaceExpressionDetection: React.FC = () => {
     return (
         <div className="p-4 container mx-auto mb-8">
             <header className="mb-8 text-center">
-                <h1 className="text-2xl font-bold mb-4">Face Expression Detection</h1>
-                <p className="text-gray-600">Upload a video to analyze its expressions.</p>
+                <h1 className="text-2xl font-bold mb-4">Анализ эмоций</h1>
+                <p className="text-gray-600">Загрузите видео для анализа эмоций</p>
             </header>
 
             <input
@@ -114,10 +121,10 @@ const FaceExpressionDetection: React.FC = () => {
                         disabled={isAnalyzing || !isModelsLoaded}
                         className="mb-4 bg-blue-500 text-white p-2"
                     >
-                        {isAnalyzing ? "Analyzing..." : "Analyze Video"}
+                        {isAnalyzing ? "Идет анализ..." : "Анализ эмоций"}
                     </button>
                     <div style={{ position: 'relative' }}>
-                        <video ref={videoRef} controls className="w-full max-w-fit">
+                        <video ref={videoRef} controls className="w-full max-w-fit min-w-full">
                             <source src={URL.createObjectURL(videoFile)} />
                         </video>
                         <canvas ref={canvasRef} className="w-full max-w-fit" style={{ position: 'absolute', top: 0, left: 0 }} />
@@ -128,6 +135,7 @@ const FaceExpressionDetection: React.FC = () => {
             {expressionsData.length > 0 && (
                 <div className="mt-8">
                     <EmotionsTable expressionsData={expressionsData} />
+                    <EmotionsChart expressionsData={expressionsData} />
                     <EmotionsBarChart expressionsData={expressionsData} />
                     <EmotionsPieChart expressionsData={expressionsData} />
                 </div>
