@@ -155,7 +155,7 @@ const FaceExpressionDetection: React.FC = () => {
         <div className="container-xl mx-auto p-2">
             <header className="flex items-center gap-4 pb-2">
                 <Link to='/emotion'><Button>Назад к списку</Button></Link>
-                <h1 className="text-2xl font-bold">{isAnalyzing ? "Идет анализ..." : "Анализ эмоций"}</h1>
+                <h1 className="text-xl font-bold">{isAnalyzing ? "Идет анализ..." : "Анализ эмоций"}</h1>
             </header>
 
             {videoFile && (
