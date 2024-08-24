@@ -51,31 +51,30 @@ export const EmotionsPieChart: React.FC<{ expressionsData: any[] }> = ({ express
         { name: 'surprised', value: emotionTotals.surprised }
     ];
 
-    const Chart = ({height=250, radius=100}: {height?: number; radius?: number}) => (
+    const Chart = ({height=250, radius=90}: {height?: number; radius?: number}) => (
         <>
-            <h2 className='text-center'>
+            <h2 className='text-center font-bold'>
                 Круговая диаграмма эмоций
             </h2>
-        <ResponsiveContainer width="100%" height={height}>
-
-            <PieChart>
-                <Tooltip />
-                <Legend content={<CustomLegend />} />
-                <Pie
-                    data={chartData}
-                    dataKey="value"
-                    nameKey="name"
-                    outerRadius={radius}
-                    fill="#8884d8"
-                    isAnimationActive={false}
-                >
-                    {chartData.map((entry, index) => (
-                        <Cell  key={`cell-${index}`} fill={emotionColors[entry.name]} />
-                    ))}
-                </Pie>
-            </PieChart>
-        </ResponsiveContainer>
-    </>
+            <ResponsiveContainer width="100%" height={height}>
+                <PieChart>
+                    <Tooltip />
+                    <Legend content={<CustomLegend />} />
+                    <Pie
+                        data={chartData}
+                        dataKey="value"
+                        nameKey="name"
+                        outerRadius={radius}
+                        fill="#8884d8"
+                        isAnimationActive={false}
+                    >
+                        {chartData.map((entry, index) => (
+                            <Cell  key={`cell-${index}`} fill={emotionColors[entry.name]} />
+                        ))}
+                    </Pie>
+                </PieChart>
+            </ResponsiveContainer>
+        </>
     )
 
     return (

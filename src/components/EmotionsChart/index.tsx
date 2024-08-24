@@ -38,8 +38,8 @@ export const EmotionsChart: React.FC<{ expressionsData: any[] }> = ({ expression
 
     const Chart = ({height = 250}: {height?: number}) => (
         <>
-            <h2 className='text-center'>
-                График распределения эмоции
+            <h2 className='text-center font-bold'>
+                График распределения эмоций
             </h2>
             <ResponsiveContainer width="100%" height={height}>
                 <LineChart data={chartData}>

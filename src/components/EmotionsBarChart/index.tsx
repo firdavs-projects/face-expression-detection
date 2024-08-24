@@ -53,27 +53,32 @@ export const EmotionsBarChart: React.FC<{ expressionsData: any[] }> = ({ express
     };
 
     const Chart = ({height = 300}: {height?: number}) => (
-        <ResponsiveContainer width="100%" height={height}>
-            <BarChart
-                data={chartData} layout="vertical"
-                title="График распределения эмоции"
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            >
-                <XAxis type="number" fontSize={14}/>
-                <YAxis type="category" dataKey="name" tick={renderCustomYAxisTick} width={80} />
-                <Tooltip />
-                <Legend />
-                <Bar isAnimationActive={false} dataKey='Интенсивность' fill='gray'>
-                    {chartData.map((data, index) => (
-                        <Cell key={`cell-${index}`} fill={emotionColors[data.key]}/>
-                    ))}
-                </Bar>
-            </BarChart>
-        </ResponsiveContainer>
+        <>
+            <h2 className='text-center font-bold'>
+                График интенсивности эмоций
+            </h2>
+            <ResponsiveContainer width="100%" height={height}>
+                <BarChart
+                    data={chartData} layout="vertical"
+                    title="График распределения эмоции"
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                    <XAxis type="number" fontSize={14}/>
+                    <YAxis type="category" dataKey="name" tick={renderCustomYAxisTick} width={80} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar isAnimationActive={false} dataKey='Интенсивность' fill='gray'>
+                        {chartData.map((data, index) => (
+                            <Cell key={`cell-${index}`} fill={emotionColors[data.key]}/>
+                        ))}
+                    </Bar>
+                </BarChart>
+            </ResponsiveContainer>
+        </>
     )
 
     return (
-        <section className='w-full h-fit relative flex items-center'>
+        <section className='w-full h-fit relative'>
             <button className='p-4 absolute -top-4 left-0 cursor-pointer z-10' onClick={toggleModal}>
                 <FullscreenIcon className='h-6 w-6' />
             </button>
