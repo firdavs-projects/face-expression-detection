@@ -58,12 +58,11 @@ export const saveVideoToDB = async (db: IDBDatabase, blob: Blob, slideIndex: num
     };
 };
 
-// Функция для удаления всех видео из IndexedDB
 export const deleteAllVideos = async (db: IDBDatabase) => {
     const transaction = db.transaction('videos', 'readwrite');
     const store = transaction.objectStore('videos');
 
-    const request = store.clear(); // Очищает все записи в хранилище
+    const request = store.clear();
 
     request.onsuccess = () => {
         console.log("All videos deleted successfully.");

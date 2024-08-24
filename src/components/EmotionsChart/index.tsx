@@ -14,7 +14,6 @@ import {Emotion} from "../../constants";
 import FullscreenIcon from "../../icons/FullscreenIcon.tsx";
 import FullscreenModal from "../Modal";
 
-// Регистрируем необходимые компоненты Chart.js
 ChartJS.register(
     CategoryScale,
     LinearScale,

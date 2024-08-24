@@ -41,7 +41,7 @@ const Slider: React.FC<SliderProps> = ({ images }) => {
                     console.warn('No video data to save');
                 }
 
-                videoChunks = []; // Очищаем локальную переменную
+                videoChunks = [];
             };
 
             mediaRecorder.start();
