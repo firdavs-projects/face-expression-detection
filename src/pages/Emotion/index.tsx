@@ -19,16 +19,15 @@ const FaceExpressionDetection: React.FC = () => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [expressionsData, setExpressionsData] = useState<any[]>([]);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [isModelsLoaded, setIsModelsLoaded] = useState(false);
     const [rangeValues, setRangeValues] = useState([0, 100]);
 
     useEffect(() => {
         if (db) {
-            getVideoFromDB(db, Number(slideId)).then(videoBlob => {
-                if (videoBlob) {
-                    setVideoFile(videoBlob);
-                    setExpressionsData([]); // Clear previous data
+            getVideoFromDB(db, Number(slideId)).then((data) => {
+                if (data) {
+                    setVideoFile(data.videoData);
+                    setExpressionsData(data.expressionsData); // Clear previous data
                     videoRef.current?.load();
                 }
             });
@@ -37,7 +36,7 @@ const FaceExpressionDetection: React.FC = () => {
 
     useEffect(() => {
         if (isModelsLoaded) {
-            handleAnalyze();
+            videoRef.current?.play();
         }
     }, [isModelsLoaded]);
 
@@ -54,100 +53,107 @@ const FaceExpressionDetection: React.FC = () => {
         loadModels();
     }, []);
 
-    const handleAnalyze = async () => {
-        if (videoRef.current && canvasRef.current && isModelsLoaded) {
-            const video = videoRef.current;
-            const canvas = canvasRef.current;
-
-            setIsAnalyzing(true);
-            video.play();
-            console.log('Start analyzing');
-
-            const displaySize = { width: video.videoWidth, height: video.videoHeight };
-            faceapi.matchDimensions(canvas, displaySize);
-
-            const interval = setInterval(async () => {
-                try {
-                    if (video && !video.paused && !video.ended) {
-                        const detections = await faceapi
-                            .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-                            .withFaceExpressions();
-                        const detectionsWithLandmarks = await faceapi
-                            .detectAllFaces(video, new faceapi.SsdMobilenetv1Options())
-                            .withFaceLandmarks();
-
-                        setExpressionsData(prevData => [...prevData, detections]);
-
-                        const ctx = canvas.getContext('2d');
-                        if (ctx) {
-                            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                            faceapi.draw.drawFaceLandmarks(canvas, detectionsWithLandmarks);
-
-                            detections.forEach(detection => {
-                                const { detection: faceDetection, expressions } = detection;
-                                const { box } = faceDetection;
-
-                                const emotion = Object.keys(expressions).reduce((maxEmotion, currentEmotion) => {
-                                    return expressions[currentEmotion as keyof typeof expressions] > expressions[maxEmotion as keyof typeof expressions]
-                                        ? currentEmotion
-                                        : maxEmotion;
-                                }, 'neutral');
-
-                                const translation = Emotion[emotion as keyof typeof Emotion] || emotion;
-
-                                ctx.font = '25px Arial';
-                                ctx.fillStyle = 'lightgreen';
-                                ctx.textAlign = 'left';
-                                ctx.strokeStyle = 'lightgreen';
-                                ctx.lineWidth = 3;
-
-                                ctx.fillText(translation, box.left, box.bottom + 25);
-                                ctx.beginPath();
-                                ctx.rect(box.left, box.top, box.width, box.height);
-                                ctx.stroke();
-                            });
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error detecting faces: ", error);
-                }
-            }, 500);
-
-            video.onended = () => {
-                clearInterval(interval);
-                setIsAnalyzing(false);
-            };
-
-            video.onpause = () => {
-                clearInterval(interval);
-                setIsAnalyzing(false);
-            };
-        }
-    };
-
     const filteredData = expressionsData.slice(
         Math.floor(expressionsData.length * (rangeValues[0] / 100)),
         Math.floor(expressionsData.length * (rangeValues[1] / 100))
     );
 
+    const drawSingleFrame = (
+        detections:   faceapi.WithFaceExpressions<faceapi.WithFaceLandmarks<{detection: faceapi.FaceDetection}, faceapi.FaceLandmarks68>>[]
+    ) => {
+        const canvas = canvasRef.current;
+        if (!canvas) {
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            console.log('Render frame')
+
+            faceapi.draw.drawFaceLandmarks(canvas, detections);
+            detections.forEach(detection => drawFrame(detection, ctx));
+        }
+    }
+
+    const drawFrame = (
+        detection:  faceapi.WithFaceExpressions<faceapi.WithFaceLandmarks<{detection: faceapi.FaceDetection}, faceapi.FaceLandmarks68>>,
+        ctx: CanvasRenderingContext2D
+    ) => {
+
+        const { detection: faceDetection, expressions } = detection;
+        const { box } = faceDetection;
+
+        const emotion = Object.keys(expressions).reduce((maxEmotion, currentEmotion) => {
+            return expressions[currentEmotion as keyof typeof expressions] > expressions[maxEmotion as keyof typeof expressions]
+                ? currentEmotion
+                : maxEmotion;
+        }, 'neutral');
+
+        const translation = Emotion[emotion as keyof typeof Emotion] || emotion;
+
+        ctx.font = '25px Arial';
+        ctx.fillStyle = 'lightgreen';
+        ctx.textAlign = 'left';
+        ctx.strokeStyle = 'lightgreen';
+        ctx.lineWidth = 3;
+
+        ctx.fillText(translation, box.left, box.bottom + 25);
+        ctx.beginPath();
+        ctx.rect(box.left, box.top, box.width, box.height);
+        ctx.stroke();
+    }
+
+    const handlePlayVideo = () => {
+        if (videoRef.current && canvasRef.current) {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+            const interval = setInterval(async () => {
+                try {
+                    const displaySize = { width: video.videoWidth, height: video.videoHeight };
+                    faceapi.matchDimensions(canvas, displaySize);
+
+                    const detections = await faceapi
+                        .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                        .withFaceLandmarks()
+                        .withFaceExpressions();
+
+                    console.log('detections', detections, isModelsLoaded);
+
+                    drawSingleFrame(detections);
+                } catch (error) {
+                    console.error("Error detecting faces: ", error);
+                }
+            }, 250);
+
+            video.onended = () => {
+                clearInterval(interval);
+            };
+
+            video.onpause = () => {
+                clearInterval(interval);
+            };
+        }
+    }
+
     useEffect(() => {
         if (videoRef.current && canvasRef.current) {
-            videoRef.current.currentTime = rangeValues[0] / 100 * videoRef.current.duration;
-            const ctx = canvasRef.current.getContext('2d');
-            if (ctx) {
-                ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-            }
+            videoRef.current.pause();
+
+            console.log(rangeValues[0], videoRef.current.duration, videoRef.current.currentTime)
+            // videoRef.current.currentTime = rangeValues[0] / 100 * videoRef.current.duration;
+            // const currentFrame = expressionsData[Math.floor(expressionsData.length * (rangeValues[1] / 100))];
+            console.log(Math.floor(expressionsData.length * (rangeValues[1] / 100)))
+            // currentFrame && drawSingleFrame(currentFrame);
         }
     }, [rangeValues[0]])
 
     useEffect(() => {
         if (videoRef.current && canvasRef.current) {
-            videoRef.current.currentTime = rangeValues[1] / 100 * videoRef.current.duration;
-            const ctx = canvasRef.current.getContext('2d');
-            if (ctx) {
-                ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-            }
+            videoRef.current.pause();
+            // videoRef.current.currentTime = rangeValues[1] / 100 * videoRef.current.duration;
+            // const currentFrame = expressionsData[Math.floor(expressionsData.length * (rangeValues[1] / 100))];
+            // currentFrame && drawSingleFrame(currentFrame);
         }
     }, [rangeValues[1]])
 
@@ -155,14 +161,14 @@ const FaceExpressionDetection: React.FC = () => {
         <div className="container-xl mx-auto p-2">
             <header className="flex items-center gap-4 pb-2">
                 <Link to='/emotion'><Button>Назад к списку</Button></Link>
-                <h1 className="text-xl font-bold">{isAnalyzing ? "Идет анализ..." : "Анализ эмоций"}</h1>
+                <h1 className="text-xl font-bold">Анализ эмоций</h1>
             </header>
 
             {videoFile && (
                 <section className='grid grid-cols-12 gap-6'>
                     <div className='col-span-7 grid gap-3'>
                         <div className='relative'>
-                            <video muted ref={videoRef} className="w-full max-w-fit min-w-full">
+                            <video preload="metadata" muted ref={videoRef} onPlay={handlePlayVideo} className="w-full max-w-fit min-w-full">
                                 <source src={URL.createObjectURL(videoFile)} />
                             </video>
                             <canvas ref={canvasRef} className="w-full h-full absolute top-0 left-0 right-0 bottom-0" />
@@ -174,7 +180,6 @@ const FaceExpressionDetection: React.FC = () => {
                                     step={1}
                                     min={0}
                                     max={100}
-                                    disabled={isAnalyzing}
                                     values={rangeValues}
                                     onChange={values => setRangeValues(values)}
                                     renderTrack={({ props, children }) => (

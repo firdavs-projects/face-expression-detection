@@ -104,7 +104,7 @@ const RealTime: React.FC = () => {
                     });
                 }
             }
-        }, 500)
+        }, 250)
     }
 
     const closeWebcam = () => {
