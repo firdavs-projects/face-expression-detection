@@ -62,16 +62,14 @@ const RealTime: React.FC = () => {
 
                 faceapi.matchDimensions(canvasRef.current, displaySize);
 
-                const detections = await faceapi.detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+                const detections = await faceapi.detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
 
-                setExpressionsData(prevData => [...prevData, detections]);
+                setExpressionsData(prevData => [...prevData, [detections]]);
 
-                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                const resizedDetections = faceapi.resizeResults([detections], displaySize) as (faceapi.WithFaceExpressions<faceapi.WithFaceLandmarks<{detection: faceapi.FaceDetection}, faceapi.FaceLandmarks68>>)[];
 
                 // @ts-ignore
                 canvasRef && canvasRef.current && canvasRef.current.getContext('2d').clearRect(0, 0, videoWidth, videoHeight);
-
-                setExpressionsData(prevData => [...prevData, detections]);
 
                 const ctx = canvas.getContext('2d');
                 if (ctx) {

@@ -64,7 +64,7 @@ const FaceExpressionDetection: React.FC = () => {
             const video = videoRef.current;
 
             return faceapi
-                .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
                 .withFaceLandmarks()
                 .withFaceExpressions().run();
         }
@@ -84,7 +84,6 @@ const FaceExpressionDetection: React.FC = () => {
             const ctx = canvas.getContext('2d');
             if (ctx) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                console.log('Render frame', video.currentTime);
 
                 faceapi.draw.drawFaceLandmarks(canvas, detections);
                 detections.forEach(detection => drawDetection(detection, ctx));
@@ -125,7 +124,7 @@ const FaceExpressionDetection: React.FC = () => {
             const video = videoRef.current;
             const interval = setInterval(async () => {
                 const detections = await analyzeDetections();
-                detections && drawDetections(detections)
+                detections && drawDetections([detections])
             }, 250);
 
             video.onended = () => {
@@ -155,10 +154,9 @@ const FaceExpressionDetection: React.FC = () => {
 
             try {
                 const currentDetection = await analyzeDetections();
-                console.log(currentDetection);
 
-                if (currentDetection && currentDetection.length > 0) {
-                    drawDetections(currentDetection);
+                if (currentDetection) {
+                    drawDetections([currentDetection]);
                 } else {
                     console.log('No detections found');
                 }

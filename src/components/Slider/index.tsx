@@ -117,11 +117,11 @@ const Slider: React.FC<SliderProps> = ({ images }) => {
         setInterval(async () => {
             if (videoRef.current && modelsLoaded) {
                 const detections = await faceapi
-                    .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+                    .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
                     .withFaceLandmarks()
                     .withFaceExpressions();
 
-                expressionsData.push(detections);
+                expressionsData.push([detections]);
             }
         }, 250)
     }
