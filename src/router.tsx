@@ -2,6 +2,7 @@ import {createBrowserRouter} from "react-router-dom";
 import FaceExpressionDetection from "./pages/Emotion";
 import Main from "./pages/Main";
 import Emotions from "./pages/Emotions";
+import Realtime from "./pages/Realtime";
 
 
 export const router = () =>
@@ -24,4 +25,10 @@ export const router = () =>
                 <Main />
             ),
         },
+        {
+            path: '/realtime',
+            element: (
+                <Realtime />
+            )
+        }
     ])

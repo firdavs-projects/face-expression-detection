@@ -31,6 +31,7 @@ export default function Emotions() {
 
             <div className='flex gap-3'>
                 <Link to='/'><Button>На главную</Button></Link>
+                <Link to='/realtime'><Button>Прямой анализ</Button></Link>
                 <Button onClick={handleRemoveDb}>Очистить все анализы</Button>
             </div>
 
