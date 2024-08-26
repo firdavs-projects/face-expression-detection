@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import * as faceapi from 'face-api.js';
-import { EmotionsTable } from "../../components/EmotionsTable";
-import { EmotionsBarChart } from "../../components/EmotionsBarChart";
-import { EmotionsPieChart } from "../../components/EmotionsPieChart";
-import { EmotionsChart } from "../../components/EmotionsChart";
-import { Emotion, SLIDES } from "../../constants";
-import { getVideoFromDB } from "../../utils";
-import { Link, useParams } from "react-router-dom";
-import { Button } from "../../components/Button";
-import { useDb } from "../../hooks/useDb.ts";
-import { Range } from 'react-range';
+import {EmotionsTable} from "../../components/EmotionsTable";
+import {EmotionsBarChart} from "../../components/EmotionsBarChart";
+import {EmotionsPieChart} from "../../components/EmotionsPieChart";
+import {EmotionsChart} from "../../components/EmotionsChart";
+import {Emotion, SLIDES} from "../../constants";
+import {getVideoFromDB} from "../../utils";
+import {Link, useParams} from "react-router-dom";
+import {Button} from "../../components/Button";
+import {useDb} from "../../hooks/useDb.ts";
+import {Range} from 'react-range';
 
 const FaceExpressionDetection: React.FC = () => {
     const db = useDb();
@@ -21,13 +21,14 @@ const FaceExpressionDetection: React.FC = () => {
     const [expressionsData, setExpressionsData] = useState<any[]>([]);
     const [isModelsLoaded, setIsModelsLoaded] = useState(false);
     const [rangeValues, setRangeValues] = useState([0, 100]);
+    const [isVideoMetaLoadded, setIsVideoMetaLoadded] = useState(false);
 
     useEffect(() => {
         if (db) {
             getVideoFromDB(db, Number(slideId)).then((data) => {
                 if (data) {
                     setVideoFile(data.videoData);
-                    setExpressionsData(data.expressionsData); // Clear previous data
+                    setExpressionsData(data.expressionsData);
                     videoRef.current?.load();
                 }
             });
@@ -58,25 +59,40 @@ const FaceExpressionDetection: React.FC = () => {
         Math.floor(expressionsData.length * (rangeValues[1] / 100))
     );
 
-    const drawSingleFrame = (
-        detections:   faceapi.WithFaceExpressions<faceapi.WithFaceLandmarks<{detection: faceapi.FaceDetection}, faceapi.FaceLandmarks68>>[]
-    ) => {
-        const canvas = canvasRef.current;
-        if (!canvas) {
-            return;
-        }
+    const analyzeDetections = async () => {
+        if (videoRef.current) {
+            const video = videoRef.current;
 
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            console.log('Render frame')
-
-            faceapi.draw.drawFaceLandmarks(canvas, detections);
-            detections.forEach(detection => drawFrame(detection, ctx));
+            return faceapi
+                .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks()
+                .withFaceExpressions().run();
         }
     }
 
-    const drawFrame = (
+    const drawDetections = async (
+        detections: faceapi.WithFaceExpressions<faceapi.WithFaceLandmarks<{detection: faceapi.FaceDetection}, faceapi.FaceLandmarks68>>[] = []
+    ) => {
+
+        if (videoRef.current && canvasRef.current && detections?.length) {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+
+            const displaySize = { width: video.videoWidth, height: video.videoHeight };
+            faceapi.matchDimensions(canvas, displaySize);
+
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                console.log('Render frame', video.currentTime);
+
+                faceapi.draw.drawFaceLandmarks(canvas, detections);
+                detections.forEach(detection => drawDetection(detection, ctx));
+            }
+        }
+    }
+
+    const drawDetection = (
         detection:  faceapi.WithFaceExpressions<faceapi.WithFaceLandmarks<{detection: faceapi.FaceDetection}, faceapi.FaceLandmarks68>>,
         ctx: CanvasRenderingContext2D
     ) => {
@@ -107,27 +123,15 @@ const FaceExpressionDetection: React.FC = () => {
     const handlePlayVideo = () => {
         if (videoRef.current && canvasRef.current) {
             const video = videoRef.current;
-            const canvas = canvasRef.current;
             const interval = setInterval(async () => {
-                try {
-                    const displaySize = { width: video.videoWidth, height: video.videoHeight };
-                    faceapi.matchDimensions(canvas, displaySize);
-
-                    const detections = await faceapi
-                        .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-                        .withFaceLandmarks()
-                        .withFaceExpressions();
-
-                    console.log('detections', detections, isModelsLoaded);
-
-                    drawSingleFrame(detections);
-                } catch (error) {
-                    console.error("Error detecting faces: ", error);
-                }
+                const detections = await analyzeDetections();
+                detections && drawDetections(detections)
             }, 250);
 
             video.onended = () => {
+                console.log('Video ended');
                 clearInterval(interval);
+                setIsVideoMetaLoadded(true);
             };
 
             video.onpause = () => {
@@ -136,25 +140,40 @@ const FaceExpressionDetection: React.FC = () => {
         }
     }
 
-    useEffect(() => {
+    const handleChangeRange = async (value: number) => {
         if (videoRef.current && canvasRef.current) {
             videoRef.current.pause();
+            videoRef.current.currentTime = (value / 100) * videoRef.current.duration;
 
-            console.log(rangeValues[0], videoRef.current.duration, videoRef.current.currentTime)
-            // videoRef.current.currentTime = rangeValues[0] / 100 * videoRef.current.duration;
-            // const currentFrame = expressionsData[Math.floor(expressionsData.length * (rangeValues[1] / 100))];
-            console.log(Math.floor(expressionsData.length * (rangeValues[1] / 100)))
-            // currentFrame && drawSingleFrame(currentFrame);
+            await new Promise((resolve) => {
+                const onTimeUpdate = () => {
+                    videoRef.current?.removeEventListener('timeupdate', onTimeUpdate);
+                    resolve(true);
+                };
+                videoRef.current?.addEventListener('timeupdate', onTimeUpdate);
+            });
+
+            try {
+                const currentDetection = await analyzeDetections();
+                console.log(currentDetection);
+
+                if (currentDetection && currentDetection.length > 0) {
+                    drawDetections(currentDetection);
+                } else {
+                    console.log('No detections found');
+                }
+            } catch (error) {
+                console.error('Error detecting faces:', error);
+            }
         }
+    };
+
+    useEffect(() => {
+        handleChangeRange(rangeValues[0]);
     }, [rangeValues[0]])
 
     useEffect(() => {
-        if (videoRef.current && canvasRef.current) {
-            videoRef.current.pause();
-            // videoRef.current.currentTime = rangeValues[1] / 100 * videoRef.current.duration;
-            // const currentFrame = expressionsData[Math.floor(expressionsData.length * (rangeValues[1] / 100))];
-            // currentFrame && drawSingleFrame(currentFrame);
-        }
+        handleChangeRange(rangeValues[1]);
     }, [rangeValues[1]])
 
     return (
@@ -181,11 +200,13 @@ const FaceExpressionDetection: React.FC = () => {
                                     min={0}
                                     max={100}
                                     values={rangeValues}
+                                    disabled={!isVideoMetaLoadded}
                                     onChange={values => setRangeValues(values)}
                                     renderTrack={({ props, children }) => (
                                         <div
                                             {...props}
-                                            className="relative w-full h-5 bg-gray-200 rounded-lg"
+                                            className={`${isVideoMetaLoadded ? 'bg-blue-200 cursor-pointer' : 'cursor-not-allowed bg-gray-300'}
+                                              relative w-full h-5 rounded-lg`}
                                         >
                                             {children}
                                         </div>

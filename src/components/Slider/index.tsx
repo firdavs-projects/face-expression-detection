@@ -127,18 +127,21 @@ const Slider: React.FC<SliderProps> = ({ images }) => {
     }
 
     return (
-        <div className="relative h-screen w-screen overflow-hidden">
-            {images.map((image, index) => (
-                <div
-                    key={index}
-                    className={`absolute inset-0 transition-transform duration-1000 ${
-                        index === currentIndex
-                            ? 'transform translate-y-0'
-                            : 'transform -translate-y-full'
-                    }`}
-                    style={{ backgroundImage: `url(${image})`, backgroundSize: 'cover' }}
-                />
-            ))}
+        <div className="relative h-screen w-screen overflow-hidden flex flex-col items-center justify-center">
+            {modelsLoaded ? images.map((image, index) => (
+                    <div
+                        key={index}
+                        className={`absolute inset-0 transition-transform duration-1000 ${
+                            index === currentIndex
+                                ? 'transform translate-y-0'
+                                : 'transform -translate-y-full'
+                        }`}
+                        style={{ backgroundImage: `url(${image})`, backgroundSize: 'cover' }}
+                    />
+                )) : (
+                    <h4 className='text-center font-bold text-2xl'>Загрузка...</h4>
+            )}
+
             <video ref={videoRef} onPlay={handleVideoOnPlay} className="hidden" autoPlay muted></video>
         </div>
     );
