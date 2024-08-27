@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {Line} from 'react-chartjs-2';
 import {
     CategoryScale,
-    Chart as ChartJS,
+    Chart as ChartJS, Filler,
     Legend,
     LinearScale,
     LineElement,
@@ -21,7 +21,8 @@ ChartJS.register(
     LineElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    Filler
 );
 
 export const EmotionsChart: React.FC<{ expressionsData: any[] }> = ({ expressionsData }) => {

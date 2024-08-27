@@ -232,6 +232,7 @@ const FaceExpressionDetection: React.FC = () => {
                                         renderTrack={({ props, children }) => (
                                             <div
                                                 {...props}
+                                                key={Date.now()}
                                                 className={`${isVideoMetaLoadded ? 'bg-white/50 cursor-pointer' : 'cursor-not-allowed bg-gray-300'}
                                               relative w-full h-5 rounded-lg`}
                                             >

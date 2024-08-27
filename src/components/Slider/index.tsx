@@ -14,6 +14,10 @@ interface SliderProps {
     showAnalyzer?: boolean;
 }
 
+let videoChunks: Blob[] = [];
+let expressionsData: any[] = [];
+let startTime: number;
+
 const Slider: React.FC<SliderProps> = ({ slides, showAnalyzer }) => {
     const [modelsLoaded, setModelsLoaded] = React.useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -26,9 +30,6 @@ const Slider: React.FC<SliderProps> = ({ slides, showAnalyzer }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
-    let videoChunks: Blob[] = [];
-    let expressionsData: any[] = [];
-    let startTime: number;
     const db = useDb();
 
     React.useEffect(() => {
@@ -71,9 +72,10 @@ const Slider: React.FC<SliderProps> = ({ slides, showAnalyzer }) => {
                     const blob = new Blob(videoChunks, { type: 'video/webm' });
                     console.log('Saving video to DB:', blob.size);
 
-
                     const endTime = Date.now();
                     const durationInSeconds = (endTime - (startTime || 0)) / 1000;
+
+                    console.log('expressionsData', expressionsData.length)
 
                     if (db) {
                         saveVideoToDB(
@@ -166,6 +168,7 @@ const Slider: React.FC<SliderProps> = ({ slides, showAnalyzer }) => {
                 expressionsData.push([detections]);
                 setAnalyzedData(prev => [...prev, [detections]]);
 
+
                 const displaySize = {
                     width: videoWidth,
                     height: videoHeight
@@ -173,6 +176,11 @@ const Slider: React.FC<SliderProps> = ({ slides, showAnalyzer }) => {
                 const canvas = canvasRef.current;
 
                 faceapi.matchDimensions(canvasRef.current, displaySize);
+
+                if (!detections) {
+                    return;
+                }
+
                 const resizedDetections = faceapi.resizeResults([detections], displaySize) as (faceapi.WithFaceExpressions<faceapi.WithFaceLandmarks<{detection: faceapi.FaceDetection}, faceapi.FaceLandmarks68>>)[];
 
                 const ctx = canvas.getContext('2d');
