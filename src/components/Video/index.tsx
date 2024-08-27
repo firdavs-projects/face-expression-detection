@@ -27,7 +27,7 @@ const Video: React.FC<{
             ref={videoRef}
             controls
             key={index}
-            className={`absolute w-screen inset-0 transition-transform duration-1000 ${
+            className={`h-full max-w-screen inset-0 transition-transform duration-1000 ${
                 index === currentIndex
                     ? 'transform translate-y-0'
                     : 'transform -translate-y-full'

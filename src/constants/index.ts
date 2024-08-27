@@ -8,6 +8,16 @@ export enum Emotion {
     surprised = "Удивление",
 }
 
+export enum EmotionColors {
+    angry = "#007AFF",
+    disgusted = "#FF3B30",
+    fearful = "#FF9500",
+    happy = "#30B0C7",
+    neutral = "#5856D6",
+    sad = "#AF52DE",
+    surprised = "#A2845E",
+}
+
 export interface ISlide {
     src: string;
     type: 'image' | 'video';

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Emotion} from "../../constants";
+import {Emotion, EmotionColors} from "../../constants";
 
 interface EmotionCounts {
     angry: number;
@@ -42,27 +42,49 @@ export const EmotionsTable: React.FC<{ expressionsData: any[] }> = ({ expression
     }));
 
     return (
-        <div className="mb-auto">
-            <h2 className="text-xl font-bold mb-2 text-center">Статистика эмоций</h2>
+        <div className="mb-auto bg-[#F7F9FB] rounded-2xl p-7">
+            <h2 className="text-lg font-bold mb-2">Статистика эмоций</h2>
             <div className='overflow-x-scroll'>
-                <table className="min-w-full bg-white">
-                    <thead>
-                    <tr>
-                        <th className="py-2 px-4 border">Эмоция</th>
-                        <th className="py-2 px-4 border">Количество</th>
-                        <th className="py-2 px-4 border">Процент (%)</th>
-                    </tr>
-                    </thead>
-                    <tbody>
+                <div className='flex flex-col gap-2'>
+                    <ul className='text-black/40 grid grid-cols-3 items-center w-full rounded-lg px-5 py-3'>
+                        <li>Эмоция</li>
+                        <li>Количество</li>
+                        <li>Процентное соотношение</li>
+                    </ul>
+
                     {percentageData.map((data) => (
-                        <tr key={data.emotion}>
-                            <td className="py-2 px-4 border">{Emotion[data.emotion as keyof typeof Emotion]}</td>
-                            <td className="py-2 px-4 border">{data.count}</td>
-                            <td className="py-2 px-4 border">{data.percentage}</td>
-                        </tr>
+                        <ul key={data.emotion} className='bg-[#E3F5FF] grid grid-cols-3 w-full rounded-2xl px-5 py-3'>
+                            <li className='flex gap-4 items-center'>
+                                <span
+                                    style={{ backgroundColor: EmotionColors[data.emotion as keyof typeof EmotionColors]}}
+                                    className='h-4 w-4 rounded-full'
+                                />
+                                {Emotion[data.emotion as keyof typeof Emotion]}
+                            </li>
+                            <li>{data.count}</li>
+                            <li>{data.percentage}</li>
+                        </ul>
                     ))}
-                    </tbody>
-                </table>
+
+                </div>
+                {/*<table className="min-w-full bg-white table-auto rounded-lg border-separate border-spacing-2">*/}
+                {/*    <thead>*/}
+                {/*    <tr>*/}
+                {/*        <th className="py-2 px-4 ">Эмоция</th>*/}
+                {/*        <th className="py-2 px-4 ">Количество</th>*/}
+                {/*        <th className="py-2 px-4 ">Процент (%)</th>*/}
+                {/*    </tr>*/}
+                {/*    </thead>*/}
+                {/*    <tbody>*/}
+                {/*    {percentageData.map((data) => (*/}
+                {/*        <tr key={data.emotion} className='bg-[#E3F5FF] w-full rounded-lg mb-2'>*/}
+                {/*            <td className="p-4">{Emotion[data.emotion as keyof typeof Emotion]}</td>*/}
+                {/*            <td className="p-4">{data.count}</td>*/}
+                {/*            <td className="p-4">{data.percentage}</td>*/}
+                {/*        </tr>*/}
+                {/*    ))}*/}
+                {/*    </tbody>*/}
+                {/*</table>*/}
             </div>
         </div>
     );

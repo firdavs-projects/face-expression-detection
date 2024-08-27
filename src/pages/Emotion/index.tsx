@@ -143,7 +143,7 @@ const FaceExpressionDetection: React.FC = () => {
 
     const handleChangeRange = async (value: number) => {
         if (videoRef.current && canvasRef.current) {
-            videoRef.current.pause();
+            // videoRef.current.pause();
             videoRef.current.currentTime = (value / 100) * duration;
 
             await new Promise((resolve) => {
@@ -173,11 +173,11 @@ const FaceExpressionDetection: React.FC = () => {
         switch (slide.type) {
             case 'image':
                 return (
-                    <img className='w-full' src={slide.src} alt='slide'/>
+                    <img className='w-full rounded-2xl' src={slide.src} alt='slide'/>
                 )
             case 'video':
                 return (
-                    <video className='w-full' src={slide.src} controls />
+                    <video className='w-full rounded-2xl'  src={slide.src} controls autoPlay muted />
                 )
         }
     }
@@ -191,10 +191,9 @@ const FaceExpressionDetection: React.FC = () => {
     }, [rangeValues[1]])
 
     return (
-        <div className="container-xl mx-auto p-2">
-            <header className="flex items-center gap-4 pb-2">
+        <div className="container-xl relative mx-auto py-6 px-9">
+            <header className="flex p-6 justify-end items-center gap-4 mx-auto fixed container left-0 bottom-0 right-0 z-20">
                 <Link to='/emotion'><Button>Назад к списку</Button></Link>
-                <h1 className="text-xl font-bold">Анализ эмоций</h1>
             </header>
 
             {videoFile && (
@@ -210,41 +209,46 @@ const FaceExpressionDetection: React.FC = () => {
                                     setIsVideoMetaLoadded(true);
                                     handlePlayVideo()
                                 }}
-                                className="w-full max-w-fit min-w-full"
+                                className="w-full max-w-fit min-w-full rounded-2xl"
                             >
                                 <source src={URL.createObjectURL(videoFile)} />
                             </video>
-                            <canvas ref={canvasRef} className="w-full h-full absolute top-0 left-0 right-0 bottom-0" />
-                        </div>
+                            <canvas
+                                onClick={() => {
+                                    videoRef.current?.play();
+                                }}
+                                ref={canvasRef} className="w-full h-full absolute top-0 left-0 right-0 bottom-0"
+                            />
 
-                        <div className='flex flex-col items-center mt-4'>
-                            <div className='w-full px-3'>
-                                <Range
-                                    step={1}
-                                    min={0}
-                                    max={100}
-                                    values={rangeValues}
-                                    disabled={!isVideoMetaLoadded}
-                                    onChange={values => setRangeValues(values)}
-                                    renderTrack={({ props, children }) => (
-                                        <div
-                                            {...props}
-                                            className={`${isVideoMetaLoadded ? 'bg-blue-200 cursor-pointer' : 'cursor-not-allowed bg-gray-300'}
+                            <div className='flex flex-col items-center absolute bottom-2 left-4 right-4'>
+                                <div className='w-full px-3'>
+                                    <Range
+                                        step={1}
+                                        min={0}
+                                        max={100}
+                                        values={rangeValues}
+                                        disabled={!isVideoMetaLoadded}
+                                        onChange={values => setRangeValues(values)}
+                                        renderTrack={({ props, children }) => (
+                                            <div
+                                                {...props}
+                                                className={`${isVideoMetaLoadded ? 'bg-white/50 cursor-pointer' : 'cursor-not-allowed bg-gray-300'}
                                               relative w-full h-5 rounded-lg`}
-                                        >
-                                            {children}
-                                        </div>
-                                    )}
-                                    renderThumb={({ props }) => (
-                                        <div
-                                            {...props}
-                                            className="w-5 h-5 bg-blue-500 rounded-full"
-                                        />
-                                    )}
-                                />
-                                <div className="flex justify-between w-full mt-2">
-                                    <span className="text-sm text-gray-600">{rangeValues[0]}%</span>
-                                    <span className="text-sm text-gray-600">{rangeValues[1]}%</span>
+                                            >
+                                                {children}
+                                            </div>
+                                        )}
+                                        renderThumb={({ props }) => (
+                                            <div
+                                                {...props}
+                                                className="w-5 h-5 bg-blue-500 rounded-full"
+                                            />
+                                        )}
+                                    />
+                                    <div className="flex justify-between w-full mt-2">
+                                        <span className="text-base bg-white/50 rounded px-2 py-1 font-bold text-blue-600">{rangeValues[0]}%</span>
+                                        <span className="text-base bg-white/50 rounded px-2 py-1 font-bold text-blue-600">{rangeValues[1]}%</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -255,7 +259,7 @@ const FaceExpressionDetection: React.FC = () => {
                     </div>
 
                     {filteredData.length > 0 && (
-                        <div className='col-span-5 grid gap-3'>
+                        <div className='col-span-5 grid gap-3 mb-auto'>
                             <EmotionsBarChart expressionsData={filteredData}/>
                             <EmotionsChart expressionsData={filteredData}/>
                             <EmotionsPieChart expressionsData={filteredData} />
@@ -264,8 +268,8 @@ const FaceExpressionDetection: React.FC = () => {
                 </section>
             )}
 
-            <section className='mt-5'>
-                <h3 className='text-xl font-bold mb-2'>
+            <section className='mt-5 bg-[#F7F9FB] p-6 rounded-2xl'>
+                <h3 className='text-lg font-bold mb-4'>
                     Анализ предоставлен по текущему материалу:
                 </h3>
 
