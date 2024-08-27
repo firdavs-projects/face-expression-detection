@@ -1,5 +1,6 @@
 import React from 'react';
-import {Emotion, EmotionColors} from "../../constants";
+import {Emotion} from "../../constants";
+import {iconEmoji} from "../../constants/icons.tsx";
 
 interface EmotionCounts {
     angry: number;
@@ -55,10 +56,7 @@ export const EmotionsTable: React.FC<{ expressionsData: any[] }> = ({ expression
                     {percentageData.map((data) => (
                         <ul key={data.emotion} className='bg-[#E3F5FF] grid grid-cols-3 w-full rounded-2xl px-5 py-3'>
                             <li className='flex gap-4 items-center'>
-                                <span
-                                    style={{ backgroundColor: EmotionColors[data.emotion as keyof typeof EmotionColors]}}
-                                    className='h-4 w-4 rounded-full'
-                                />
+                                {iconEmoji[data.emotion as keyof typeof Emotion]}
                                 {Emotion[data.emotion as keyof typeof Emotion]}
                             </li>
                             <li>{data.count}</li>
