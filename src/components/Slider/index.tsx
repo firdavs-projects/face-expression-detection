@@ -2,19 +2,23 @@ import React, { useState, useEffect, useRef } from 'react';
 import { saveVideoToDB } from "../../utils";
 import { useDb } from "../../hooks/useDb.ts";
 import * as faceapi from "face-api.js";
+import {ISlide} from "../../constants";
+import Video from "../Video";
 
 interface SliderProps {
-    images: string[];
+    slides: ISlide[];
 }
 
-const Slider: React.FC<SliderProps> = ({ images }) => {
+const Slider: React.FC<SliderProps> = ({ slides }) => {
     const [modelsLoaded, setModelsLoaded] = React.useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
     let videoChunks: Blob[] = [];
     let expressionsData: any[] = [];
+    let startTime: number;
     const db = useDb();
 
     React.useEffect(() => {
@@ -26,7 +30,7 @@ const Slider: React.FC<SliderProps> = ({ images }) => {
                 faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
                 faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
             ]).then(() => setModelsLoaded(true));
-        }
+        };
         loadModels();
     }, []);
 
@@ -56,8 +60,21 @@ const Slider: React.FC<SliderProps> = ({ images }) => {
                 if (videoChunks.length > 0) {
                     const blob = new Blob(videoChunks, { type: 'video/webm' });
                     console.log('Saving video to DB:', blob.size);
+
+
+                    const endTime = Date.now();
+                    const durationInSeconds = (endTime - (startTime || 0)) / 1000;
+
                     if (db) {
-                        saveVideoToDB(db, blob, currentIndex, expressionsData);
+                        saveVideoToDB(
+                            db,
+                            {
+                                videoData: blob,
+                                slideIndex: currentIndex,
+                                expressionsData,
+                                duration: durationInSeconds
+                            }
+                        );
                     }
                 } else {
                     console.warn('No video data to save');
@@ -65,8 +82,11 @@ const Slider: React.FC<SliderProps> = ({ images }) => {
 
                 videoChunks = [];
                 expressionsData = [];
+                startTime = 0;
             };
 
+
+            startTime = Date.now();
             mediaRecorder.start();
             mediaRecorderRef.current = mediaRecorder;
         } catch (error) {
@@ -89,7 +109,7 @@ const Slider: React.FC<SliderProps> = ({ images }) => {
     const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === 'PageDown' || event.key === 'ArrowDown') {
             stopRecording();
-            setCurrentIndex(currentIndex => currentIndex === images.length - 1 ? currentIndex : currentIndex + 1);
+            setCurrentIndex(currentIndex => currentIndex === slides.length - 1 ? currentIndex : currentIndex + 1);
         } else if (event.key === 'PageUp' || event.key === 'ArrowUp') {
             stopRecording();
             setCurrentIndex(currentIndex => currentIndex === 0 ? currentIndex : currentIndex - 1);
@@ -104,8 +124,7 @@ const Slider: React.FC<SliderProps> = ({ images }) => {
             window.removeEventListener('keydown', handleKeyDown);
             stopRecording();
         };
-
-    }, [])
+    }, []);
 
     useEffect(() => {
         if (modelsLoaded) {
@@ -123,23 +142,34 @@ const Slider: React.FC<SliderProps> = ({ images }) => {
 
                 expressionsData.push([detections]);
             }
-        }, 250)
-    }
+        }, 250);
+    };
 
     return (
-        <div className="relative h-screen w-screen overflow-hidden flex flex-col items-center justify-center">
-            {modelsLoaded ? images.map((image, index) => (
-                    <div
-                        key={index}
-                        className={`absolute inset-0 transition-transform duration-1000 ${
-                            index === currentIndex
-                                ? 'transform translate-y-0'
-                                : 'transform -translate-y-full'
-                        }`}
-                        style={{ backgroundImage: `url(${image})`, backgroundSize: 'cover' }}
-                    />
-                )) : (
-                    <h4 className='text-center font-bold text-2xl'>Загрузка...</h4>
+        <div className="relative h-screen w-screen overflow-y-scroll flex flex-col items-center justify-center">
+            {modelsLoaded ? slides.map((slide, index) => {
+                switch (slide.type) {
+                    case 'image':
+                        return (
+                            (
+                                <div
+                                    key={index}
+                                    className={`absolute inset-0 transition-transform duration-1000 ${
+                                        index === currentIndex
+                                            ? 'transform translate-y-0'
+                                            : 'transform -translate-y-full'
+                                    }`}
+                                    style={{ backgroundImage: `url(${slide.src})`, backgroundSize: 'cover' }}
+                                />
+                            )
+                        )
+                    case 'video':
+                        return (
+                            <Video key={index} index={index} currentIndex={currentIndex} slide={slide} />
+                        )
+                }
+            }) : (
+                <h4 className='text-center font-bold text-2xl'>Загрузка...</h4>
             )}
 
             <video ref={videoRef} onPlay={handleVideoOnPlay} className="hidden" autoPlay muted></video>

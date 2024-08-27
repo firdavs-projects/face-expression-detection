@@ -1,4 +1,10 @@
 
+export interface IVideoData {
+    slideIndex: number;
+    videoData: Blob;
+    expressionsData: any[];
+    duration: number
+}
 
 export const openDatabase = (): Promise<IDBDatabase> => {
     return new Promise((resolve, reject) => {
@@ -21,11 +27,7 @@ export const openDatabase = (): Promise<IDBDatabase> => {
     });
 };
 
-export const getVideoFromDB = (db: IDBDatabase | null, slideIndex: number): Promise<{
-    slideIndex: number;
-    videoData: Blob;
-    expressionsData: any[]
-} | null> => {
+export const getVideoFromDB = (db: IDBDatabase | null, slideIndex: number): Promise<IVideoData | null> => {
     if (!db) {
         return Promise.resolve(null);
     }
@@ -48,13 +50,13 @@ export const getVideoFromDB = (db: IDBDatabase | null, slideIndex: number): Prom
     });
 };
 
-export const saveVideoToDB = async (db: IDBDatabase, blob: Blob, slideIndex: number, expressionsData: any[]) => {
+export const saveVideoToDB = async (db: IDBDatabase, videoData: IVideoData) => {
     const transaction = db.transaction('videos', 'readwrite');
     const store = transaction.objectStore('videos');
-    store.put({ slideIndex, videoData: blob, expressionsData });
+    store.put(videoData);
 
     transaction.oncomplete = () => {
-        console.log(`Video for slide ${slideIndex} saved.`);
+        console.log(`Video for slide ${videoData.slideIndex} saved.`);
     };
 
     transaction.onerror = (event) => {

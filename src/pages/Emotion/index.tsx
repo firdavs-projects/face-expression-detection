@@ -22,6 +22,7 @@ const FaceExpressionDetection: React.FC = () => {
     const [isModelsLoaded, setIsModelsLoaded] = useState(false);
     const [rangeValues, setRangeValues] = useState([0, 100]);
     const [isVideoMetaLoadded, setIsVideoMetaLoadded] = useState(false);
+    const [duration, setDuration] = useState(0);
 
     useEffect(() => {
         if (db) {
@@ -29,6 +30,7 @@ const FaceExpressionDetection: React.FC = () => {
                 if (data) {
                     setVideoFile(data.videoData);
                     setExpressionsData(data.expressionsData);
+                    setDuration(data.duration)
                     videoRef.current?.load();
                 }
             });
@@ -142,7 +144,7 @@ const FaceExpressionDetection: React.FC = () => {
     const handleChangeRange = async (value: number) => {
         if (videoRef.current && canvasRef.current) {
             videoRef.current.pause();
-            videoRef.current.currentTime = (value / 100) * videoRef.current.duration;
+            videoRef.current.currentTime = (value / 100) * duration;
 
             await new Promise((resolve) => {
                 const onTimeUpdate = () => {
@@ -166,6 +168,20 @@ const FaceExpressionDetection: React.FC = () => {
         }
     };
 
+    const currentSlide = () => {
+        const slide = SLIDES[Number(slideId)];
+        switch (slide.type) {
+            case 'image':
+                return (
+                    <img className='w-full' src={slide.src} alt='slide'/>
+                )
+            case 'video':
+                return (
+                    <video className='w-full' src={slide.src} controls />
+                )
+        }
+    }
+
     useEffect(() => {
         handleChangeRange(rangeValues[0]);
     }, [rangeValues[0]])
@@ -185,7 +201,17 @@ const FaceExpressionDetection: React.FC = () => {
                 <section className='grid grid-cols-12 gap-6'>
                     <div className='col-span-7 grid gap-3'>
                         <div className='relative'>
-                            <video preload="metadata" muted ref={videoRef} onPlay={handlePlayVideo} className="w-full max-w-fit min-w-full">
+                            <video
+                                preload="auto"
+                                muted
+                                ref={videoRef}
+                                onLoadedMetadata={() => {
+                                    videoRef.current?.play();
+                                    setIsVideoMetaLoadded(true);
+                                    handlePlayVideo()
+                                }}
+                                className="w-full max-w-fit min-w-full"
+                            >
                                 <source src={URL.createObjectURL(videoFile)} />
                             </video>
                             <canvas ref={canvasRef} className="w-full h-full absolute top-0 left-0 right-0 bottom-0" />
@@ -240,9 +266,10 @@ const FaceExpressionDetection: React.FC = () => {
 
             <section className='mt-5'>
                 <h3 className='text-xl font-bold mb-2'>
-                    Анализ предоставлен по текущему изображению:
+                    Анализ предоставлен по текущему материалу:
                 </h3>
-                <img className='w-full' src={SLIDES[Number(slideId)]} alt='slide'/>
+
+                {currentSlide()}
             </section>
         </div>
     );
