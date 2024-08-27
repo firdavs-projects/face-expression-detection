@@ -14,8 +14,8 @@ export interface ISlide {
 }
 
 export const SLIDES: ISlide[] = [
-    {src: '/slides/1.jpg', type: 'image'},
     {src: '/slides/1.mp4', type: 'video'},
+    {src: '/slides/1.jpg', type: 'image'},
     {src: '/slides/2.jpg', type: 'image'},
     {src: '/slides/3.jpg', type: 'image'},
     {src: '/slides/4.jpg', type: 'image'},
