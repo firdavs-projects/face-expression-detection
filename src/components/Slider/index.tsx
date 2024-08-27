@@ -93,6 +93,7 @@ const Slider: React.FC<SliderProps> = ({ slides, showAnalyzer }) => {
                 videoChunks = [];
                 expressionsData = [];
                 startTime = 0;
+                setAnalyzedData([]);
             };
 
 
@@ -118,11 +119,23 @@ const Slider: React.FC<SliderProps> = ({ slides, showAnalyzer }) => {
 
     const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === 'PageDown' || event.key === 'ArrowDown') {
-            stopRecording();
-            setCurrentIndex(currentIndex => currentIndex === slides.length - 1 ? currentIndex : currentIndex + 1);
+            setCurrentIndex(currentIndex => {
+                if (currentIndex === slides.length - 1) {
+                    return currentIndex;
+                } else {
+                    stopRecording();
+                    return currentIndex + 1
+                }
+            });
         } else if (event.key === 'PageUp' || event.key === 'ArrowUp') {
-            stopRecording();
-            setCurrentIndex(currentIndex => currentIndex === 0 ? currentIndex : currentIndex - 1);
+            setCurrentIndex(currentIndex => {
+                if (currentIndex === 0) {
+                    return currentIndex;
+                } else {
+                    stopRecording();
+                    return currentIndex - 1
+                }
+            });
         }
     };
 
@@ -200,7 +213,7 @@ const Slider: React.FC<SliderProps> = ({ slides, showAnalyzer }) => {
                 className={`absolute inset-0 transition-transform duration-1000 top-0 left-0 px-9 py-6 right-0 bottom-0 ${
                     showAnalyzer
                         ? 'transform translate-x-0'
-                        : 'transform translate-x-full'
+                        : 'transform translate-x-full h-screen overflow-hidden'
                 }`}
             >
                 <section className='grid grid-cols-12 gap-6'>
@@ -255,7 +268,7 @@ const Slider: React.FC<SliderProps> = ({ slides, showAnalyzer }) => {
                                                 ? 'transform translate-y-0'
                                                 : 'transform -translate-y-full'
                                         }`}
-                                        style={{ backgroundImage: `url(${slide.src})`, backgroundSize: 'cover' }}
+                                        style={{ backgroundImage: `url(${slide.src})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
                                     />
                                 )
                             )

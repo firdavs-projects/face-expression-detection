@@ -2,40 +2,37 @@ import Slider from "../../components/Slider";
 import {Button} from "../../components/Button";
 import {Link} from "react-router-dom";
 import {SLIDES} from "../../constants";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 
 export default function Main() {
     const [isStarted, setIsStarted] = useState(false);
     const [isAnalyzeShowed, setIsAnalyzeShowed] = useState(false);
 
+    // const handleKeyDown = (e: KeyboardEvent) => {
+    //     if (e.key === 'ArrowRight' && isStarted) {
+    //         e.preventDefault();
+    //         setIsAnalyzeShowed(true);
+    //     }
+    //     if (e.key === 'ArrowLeft' && isStarted) {
+    //         e.preventDefault();
+    //         setIsAnalyzeShowed(false);
+    //     }
+    // } // Not working because of video controls
+
+    useEffect(() => {
+        navigator.mediaDevices.getUserMedia({ video: { width: 0 } })
+
+        // window.addEventListener('keydown', handleKeyDown);
+        // return () => {
+        //     window.removeEventListener('keydown', handleKeyDown);
+        // };
+    }, []);
+
     return (
-        <div className="container-xl relative my-auto mx-auto flex flex-col items-center justify-center h-screen">
+        <div className="container-xl relative my-auto mx-auto flex flex-col items-center justify-center h-screen w-screen overflow-x-hidden">
 
-            {isStarted?
-                <>
-                    {/*<section*/}
-                    {/*    className={`absolute inset-0 transition-transform duration-1000 top-0 left-0 right-0 bottom-0 ${*/}
-                    {/*        !isAnalyzeShowed*/}
-                    {/*            ? 'transform translate-x-0'*/}
-                    {/*            : 'transform -translate-x-full'*/}
-                    {/*    }`}*/}
-                    {/*>*/}
-                        <Slider slides={SLIDES} showAnalyzer={isAnalyzeShowed} />
-                    {/*</section>*/}
-
-                    {/*<section*/}
-                    {/*    className={`absolute inset-0 transition-transform duration-1000 top-0 left-0 right-0 bottom-0 ${*/}
-                    {/*        isAnalyzeShowed*/}
-                    {/*            ? 'transform translate-x-0'*/}
-                    {/*            : 'transform translate-x-full'*/}
-                    {/*    }`}*/}
-                    {/*>*/}
-                    {/*</section>*/}
-                </>
-                : null}
-
-
+            {isStarted ? <Slider slides={SLIDES} showAnalyzer={isAnalyzeShowed} /> : null}
 
             {!isStarted && (
                 <img className='mx-auto w-[50%]' src='/logo.png' alt='logo'/>

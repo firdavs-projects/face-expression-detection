@@ -116,18 +116,18 @@ const RealTime: React.FC = () => {
     }
 
     return (
-        <div className="container-xl mx-auto p-2">
-            <header className="flex items-center gap-4 pb-2">
-                <Link to='/emotion'><Button>Назад к списку</Button></Link>
+        <div className="container-xl relative mx-auto px-9 py-6">
+            <header className="flex justify-end items-center gap-4 p-6 fixed right-0 bottom-0 left-0 mx-auto container z-20">
                 <Button onClick={captureVideo? closeWebcam: startVideo}>
                     {captureVideo ? 'Закрыть камеру' :'Открыть камеру'}
                 </Button>
+                <Link to='/emotion'><Button>Назад к списку</Button></Link>
             </header>
 
             {captureVideo && modelsLoaded && <section className='grid grid-cols-12 gap-6'>
-                <div className='col-span-7 grid gap-3'>
+                <div className='col-span-7 grid gap-6'>
                     <div className='relative'>
-                        <video muted ref={videoRef} onPlay={handleVideoOnPlay} className="w-full max-w-fit min-w-full"/>
+                        <video muted ref={videoRef} onPlay={handleVideoOnPlay} className="w-full max-w-fit min-w-full rounded-2xl"/>
                         <canvas ref={canvasRef} className="w-full h-full absolute top-0 left-0 right-0 bottom-0"/>
                     </div>
 
