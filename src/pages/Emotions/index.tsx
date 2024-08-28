@@ -21,7 +21,7 @@ export default function Emotions() {
         <div className="container mx-auto flex flex-col items-center justify-center min-h-screen">
             <h1 className="text-3xl w-full font-bold py-9">Список слайдов</h1>
 
-            <ul className='grid grid-cols-2 gap-y-5 gap-x-12 w-full mb-[120px]'>
+            <ul className='grid grid-cols-2 gap-y-5 gap-x-12 w-full mb-[140px]'>
                 {SLIDES.map((slide, idx) => (
                     <Link className='p-3 flex items-center gap-3 rounded-2xl bg-[#E3F5FF]' key={slide.src} to={`/emotion/${idx}`}>
                         {slide.type === 'image'
@@ -29,13 +29,13 @@ export default function Emotions() {
                             : <video className='w-[100px] aspect-square object-cover rounded-xl' src={slide.src} autoPlay muted loop />}
                         <li className='font-bold flex flex-col gap-3 w-full'>
                             {slide.title} {idx+1}
-                            <Button className='w-full px-2 py-1'>Посмотреть результаты</Button>
+                            <Button className='w-full text-sm !py-2 mr-auto'>Посмотреть результаты</Button>
                         </li>
                     </Link>
                 ))}
             </ul>
 
-            <header className='fixed container mx-auto bottom-0 left-0 right-0 flex justify-center items-center gap-3 p-3'>
+            <header className='fixed container mx-auto bottom-0 left-0 right-0 flex justify-center items-center gap-5 p-3'>
                 <img className='w-[250px] bg-white/70 rounded-3xl' src='/logo.png' alt='logo'/>
                 <Link className='w-full' to='/'><Button className='w-full'>На главную</Button></Link>
                 <Link className='w-full' to='/realtime'><Button className='w-full'>Прямой анализ</Button></Link>
