@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { Pie } from 'react-chartjs-2';
+import {Doughnut} from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     ArcElement,
@@ -8,7 +8,7 @@ import {
     ChartOptions,
     TooltipItem,
 } from 'chart.js';
-import {Emotion} from "../../constants";
+import {Emotion, EmotionColors} from "../../constants";
 import FullscreenIcon from "../../icons/FullscreenIcon.tsx";
 import FullscreenModal from "../Modal";
 
@@ -57,33 +57,37 @@ export const EmotionsPieChart: React.FC<{ expressionsData: any[] }> = ({ express
                     emotionTotals.surprised
                 ],
                 backgroundColor: [
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                    'rgba(153, 102, 255, 0.6)',
-                    'rgba(255, 159, 64, 0.6)',
-                    'rgba(201, 203, 207, 0.6)'
+                   EmotionColors.angry,
+                   EmotionColors.disgusted,
+                   EmotionColors.fearful,
+                   EmotionColors.happy,
+                   EmotionColors.neutral,
+                   EmotionColors.sad,
+                   EmotionColors.surprised
                 ],
                 borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)',
-                    'rgba(201, 203, 207, 1)'
+                   EmotionColors.angry,
+                   EmotionColors.disgusted,
+                   EmotionColors.fearful,
+                   EmotionColors.happy,
+                   EmotionColors.neutral,
+                   EmotionColors.sad,
+                   EmotionColors.surprised
                 ],
-                borderWidth: 1,
+                // offset: 4,
+                // hoverOffset: 4
             },
         ],
     };
 
-    const options: ChartOptions<'pie'> = {
+    const options: ChartOptions<'doughnut'> = {
         responsive: true,
         plugins: {
             legend: {
                 position: 'left',
+                labels: {
+                    usePointStyle: true,
+                }
             },
             title: {
                 display: true,
@@ -91,7 +95,7 @@ export const EmotionsPieChart: React.FC<{ expressionsData: any[] }> = ({ express
             },
             tooltip: {
                 callbacks: {
-                    label: function(tooltipItem: TooltipItem<'pie'>) {
+                    label: function(tooltipItem: TooltipItem<'doughnut'>) {
                         return `${tooltipItem.label}: ${tooltipItem.raw}`;
                     }
                 }
@@ -100,14 +104,14 @@ export const EmotionsPieChart: React.FC<{ expressionsData: any[] }> = ({ express
     };
 
     return (
-        <section className='max-h-[350px] w-full relative'>
-            <button className='p-4 absolute -top-4 left-0 cursor-pointer' onClick={toggleModal}>
+        <section className=' w-full relative'>
+            <button className='p-4 absolute top-0 left-0 cursor-pointer' onClick={toggleModal}>
                 <FullscreenIcon className='h-6 w-6'/>
             </button>
-            <Pie data={data} options={options}  />
+            <Doughnut className='bg-[#F7F9FB] p-5 rounded-2xl' data={data} options={options}  />
 
             <FullscreenModal visible={isModalVisible} onClose={toggleModal}>
-                <Pie data={data} options={options}  />
+                <Doughnut data={data} options={options}  />
             </FullscreenModal>
         </section>
     );

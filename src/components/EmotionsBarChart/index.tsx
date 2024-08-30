@@ -1,7 +1,15 @@
 import React, {useState} from 'react';
 import {Bar} from 'react-chartjs-2';
-import {BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip,} from 'chart.js';
-import {Emotion} from "../../constants";
+import {
+    BarElement,
+    CategoryScale,
+    Chart as ChartJS,
+    Legend,
+    LinearScale,
+    Title,
+    Tooltip,
+} from 'chart.js';
+import {Emotion, EmotionColors} from "../../constants";
 import FullscreenModal from "../Modal";
 import FullscreenIcon from "../../icons/FullscreenIcon.tsx";
 
@@ -43,50 +51,50 @@ export const EmotionsBarChart: React.FC<{ expressionsData: any[] }> = ({ express
             {
                 label: Emotion.angry,
                 data: [emotionTotals.angry],
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: EmotionColors.angry,
+                borderColor: EmotionColors.angry,
                 borderWidth: 1,
             },
             {
                 label: Emotion.disgusted,
                 data: [emotionTotals.disgusted],
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: EmotionColors.disgusted,
+                borderColor: EmotionColors.disgusted,
                 borderWidth: 1,
             },
             {
                 label: Emotion.fearful,
                 data: [emotionTotals.fearful],
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: EmotionColors.fearful,
+                borderColor: EmotionColors.fearful,
                 borderWidth: 1,
             },
             {
                 label: Emotion.happy,
                 data: [emotionTotals.happy],
-                backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                borderColor: 'rgba(255, 206, 86, 1)',
+                backgroundColor: EmotionColors.happy,
+                borderColor: EmotionColors.happy,
                 borderWidth: 1,
             },
             {
                 label: Emotion.neutral,
                 data: [emotionTotals.neutral],
-                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                borderColor: 'rgba(153, 102, 255, 1)',
+                backgroundColor: EmotionColors.neutral,
+                borderColor: EmotionColors.neutral,
                 borderWidth: 1,
             },
             {
                 label: Emotion.sad,
                 data: [emotionTotals.sad],
-                backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                borderColor: 'rgba(255, 159, 64, 1)',
+                backgroundColor: EmotionColors.sad,
+                borderColor: EmotionColors.sad,
                 borderWidth: 1,
             },
             {
                 label: Emotion.surprised,
                 data: [emotionTotals.surprised],
-                backgroundColor: 'rgba(201, 203, 207, 0.2)',
-                borderColor: 'rgba(201, 203, 207, 1)',
+                backgroundColor: EmotionColors.surprised,
+                borderColor: EmotionColors.surprised,
                 borderWidth: 1,
             },
         ],
@@ -94,9 +102,22 @@ export const EmotionsBarChart: React.FC<{ expressionsData: any[] }> = ({ express
 
     const options = {
         responsive: true,
+        elements: {
+            bar: {
+                borderRadius: 10,
+                borderSkipped: false
+            },
+            // point: {
+            //     pointStyle: false
+            // },
+        },
         plugins: {
             legend: {
                 position: 'top' as const,
+                labels: {
+                    usePointStyle: true,
+                }
+
             },
             title: {
                 display: true,
@@ -121,11 +142,11 @@ export const EmotionsBarChart: React.FC<{ expressionsData: any[] }> = ({ express
     };
 
     return <section className='w-full h-fit relative'>
-        <button className='p-4 absolute -top-4 left-0 cursor-pointer' onClick={toggleModal}>
+        <button className='p-4 absolute -top-1 left-0 cursor-pointer' onClick={toggleModal}>
             <FullscreenIcon className='h-6 w-6 '/>
         </button>
 
-        <Bar data={data} options={options} />
+        <Bar className='bg-[#F7F9FB] p-5 rounded-2xl' data={data} options={options} />
 
         <FullscreenModal visible={isModalVisible} onClose={toggleModal}>
             <Bar data={data} options={options} />

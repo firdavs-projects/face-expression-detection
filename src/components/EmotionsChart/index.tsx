@@ -1,20 +1,19 @@
 import React, {useState} from 'react';
-import { Line } from 'react-chartjs-2';
+import {Line} from 'react-chartjs-2';
 import {
-    Chart as ChartJS,
     CategoryScale,
+    Chart as ChartJS, Filler,
+    Legend,
     LinearScale,
-    PointElement,
     LineElement,
+    PointElement,
     Title,
     Tooltip,
-    Legend,
 } from 'chart.js';
-import {Emotion} from "../../constants";
+import {Emotion, EmotionColors} from "../../constants";
 import FullscreenIcon from "../../icons/FullscreenIcon.tsx";
 import FullscreenModal from "../Modal";
 
-// Регистрируем необходимые компоненты Chart.js
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -22,7 +21,8 @@ ChartJS.register(
     LineElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    Filler
 );
 
 export const EmotionsChart: React.FC<{ expressionsData: any[] }> = ({ expressionsData }) => {
@@ -35,60 +35,70 @@ export const EmotionsChart: React.FC<{ expressionsData: any[] }> = ({ expression
             {
                 label: Emotion.angry,
                 data: expressionsData.map(data => data[0]?.expressions?.angry || 0),
-                borderColor: 'rgba(255, 99, 132, 1)',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                fill: false,
+                borderColor: EmotionColors.angry,
+                backgroundColor: EmotionColors.angry,
+                fill: true,
             },
             {
                 label: Emotion.disgusted,
                 data: expressionsData.map(data => data[0]?.expressions?.disgusted || 0),
-                borderColor: 'rgba(54, 162, 235, 1)',
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                fill: false,
+                borderColor: EmotionColors.disgusted,
+                backgroundColor: EmotionColors.disgusted,
+                fill: true,
             },
             {
                 label: Emotion.fearful,
                 data: expressionsData.map(data => data[0]?.expressions?.fearful || 0),
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: false,
+                borderColor: EmotionColors.fearful,
+                backgroundColor: EmotionColors.fearful,
+                fill: true,
             },
             {
                 label: Emotion.happy,
                 data: expressionsData.map(data => data[0]?.expressions?.happy || 0),
-                borderColor: 'rgba(255, 206, 86, 1)',
-                backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                fill: false,
+                borderColor: EmotionColors.happy,
+                backgroundColor: EmotionColors.happy,
+                fill: true,
             },
             {
                 label: Emotion.neutral,
                 data: expressionsData.map(data => data[0]?.expressions?.neutral || 0),
-                borderColor: 'rgba(153, 102, 255, 1)',
-                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                fill: false,
+                borderColor: EmotionColors.neutral,
+                backgroundColor: EmotionColors.neutral,
+                fill: true,
             },
             {
                 label: Emotion.sad,
                 data: expressionsData.map(data => data[0]?.expressions?.sad || 0),
-                borderColor: 'rgba(255, 159, 64, 1)',
-                backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                fill: false,
+                borderColor: EmotionColors.sad,
+                backgroundColor: EmotionColors.sad,
+                fill: true,
             },
             {
                 label: Emotion.surprised,
                 data: expressionsData.map(data => data[0]?.expressions?.surprised || 0),
-                borderColor: 'rgba(201, 203, 207, 1)',
-                backgroundColor: 'rgba(201, 203, 207, 0.2)',
-                fill: false,
+                borderColor: EmotionColors.surprised,
+                backgroundColor: EmotionColors.surprised,
+                fill: true,
             },
         ],
     };
 
     const options = {
         responsive: true,
+        elements: {
+            // line: {
+            //     fill: false,
+            //     borderJoinStyle: 'round'
+            // }
+        },
         plugins: {
             legend: {
                 position: 'top' as const,
+                labels: {
+                    usePointStyle: true,
+                    padding: 13
+                }
             },
             title: {
                 display: true,
@@ -114,10 +124,10 @@ export const EmotionsChart: React.FC<{ expressionsData: any[] }> = ({ expression
 
     return (
         <section className='w-full h-fit relative'>
-            <button className='p-4 absolute -top-4 left-0 cursor-pointer' onClick={toggleModal}>
+            <button className='p-4 absolute -top-1 left-0 cursor-pointer' onClick={toggleModal}>
                 <FullscreenIcon className='h-6 w-6'/>
             </button>
-            <Line data={data} options={options} />
+            <Line className='bg-[#F7F9FB] p-5 rounded-2xl' data={data} options={options} />
 
             <FullscreenModal visible={isModalVisible} onClose={toggleModal}>
                 <Line data={data} options={options} />
